@@ -18,10 +18,10 @@
             <li class="nav-item" onclick="myFunction(1)">
                 <a class="nav-link" href="#">Control</a>
             </li>
-            <li class="nav-item" onclick="myFunction(2)">
+            <!--<li class="nav-item" onclick="myFunction(2)">
                 <a class="nav-link" href="#">Etiqueta</a>
-            </li>
-            <li class="nav-item" onclick="myFunction(3)">
+            </li> -->
+            <li class="nav-item" onclick="myFunction(2)">
                 <a class="nav-link" href="#">Baja OP</a>
             </li>    
           </ul>
@@ -37,11 +37,27 @@
                 <div id="control">
                     <h2 class="mb-3 text-center">{{ id }}</h2>
                     <h4 class="mb-3">Control</h4>
-                        <form>
+                    {% with messages = get_flashed_messages()  %}
+                    {% if messages %}
+                    {% for message in messages %}
+                      <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                        <form action="{{url_for('escanear_codigo')}}" method="POST">
                             <div class="form-group">
-                            <input type="text" class="form-control" id="cod_escaneado" placeholder="Codigo escaneado">
+                            <input type="text" class="form-control" id="cod_escaneado" name="cod_escaneado" placeholder="Codigo Escaneado">
                             </div>
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <div class="form-group">
+                                <input type="text" style="display:none" class="form-control" id="maquina" name="maquina" placeholder="Codigo Escaneado"
+                                   value={{ id }}>
+                            </div>
+                            <button type="submit" style="display:none;" class="btn btn-primary">Submit</button>
                         </form>
             <br>
                         <table class="table table-dark table-striped">
@@ -52,21 +68,19 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <th scope="row">5555</th>
-                                    <td>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">1111</th>
-                                    <td>aaaaaaabbbbbbbb</td>
-                                </tr>
+                              {% for pieza in piezas %}
+                              <tr>
+                                <td>{{pieza.0}}</td>
+                                <td>{{pieza.1}}</td>
+                              </tr>
+                              {% endfor %}
                             </tbody>
                         </table>
             <br>
                 </div>
 
 
-                <div id="etiqueta" style="display:none;">
+                <!--<div id="etiqueta" style="display:none;">
                     <h2 class="mb-3 text-center">{{ id }}</h2>
                     <h4 class="mb-3">Sistema de etiquetas</h4>
                     <form>
@@ -86,7 +100,7 @@
                     <div><label>{{id}}</label></div>
                     <button type="submit" class="btn btn-success">Imprimir</button>
                     </form>
-                </div>
+                </div>  -->
 
 
                 <div id="baja_op" style="display:none;">
@@ -95,7 +109,15 @@
                     <form>
                     <div class="form-group">
                         <label for="op2">OP:</label>
-                        <input type="text" class="form-control" id="op2" placeholder="OP">
+                        <input list="browsers" type="text" class="form-control" id="op2" placeholder="OP">
+                        <datalist id="browsers">
+                          <option value="Chrome">
+                          <option value="Firefox">
+                          <option value="Internet Explorer">
+                          <option value="Opera">
+                          <option value="Safari">
+                          <option value="Microsoft Edge">
+                        </datalist>
                     </div>
                     <div class="row">
                         <div class="col">
@@ -115,28 +137,20 @@
         </div>
     <script>
         function myFunction(idButton) {
-            var producto1 = document.getElementById('control');
-            var producto2 = document.getElementById('etiqueta');
-            var producto3 = document.getElementById('baja_op');
+            var div1 = document.getElementById('control');
+            var div2 = document.getElementById('baja_op');
 
         switch(idButton) {
             case 1:
-                producto1.style.display = 'block';
-                producto2.style.display = 'none';
-                producto3.style.display = 'none';
+                div1.style.display = 'block';
+                div2.style.display = 'none';
                 break;
             case 2:
-                producto1.style.display = 'none';
-                producto2.style.display = 'block';
-                producto3.style.display = 'none';
-                break;
-            case 3:
-                producto1.style.display = 'none';
-                producto2.style.display = 'none';
-                producto3.style.display = 'block';
+                div1.style.display = 'none';
+                div2.style.display = 'block';
                 break;
         default:
-          alert("hay un problema: No existe el producto.")
+          alert("hay un problema: No existe id.")
         }
     }
     </script>
@@ -145,6 +159,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <!--  <script src="{{url_for('static', filename='js/main.js')}}"></script> -->
-    </body>
+         </body>
 
 </html>

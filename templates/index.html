@@ -30,7 +30,7 @@
                 Pegado
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/STF">STF</a>
+                <a class="dropdown-item" href="/plantilla1">STF</a>
                 <a class="dropdown-item" href="/MRT1">MRT1</a>
                 <a class="dropdown-item" href="/MRT2">MRT2</a>
                 <a class="dropdown-item" href="/MRT3">MRT3</a>
@@ -102,6 +102,28 @@
         <div class="col-md-12 order-md-1">
           <br>
           <h4 class="mb-3 text-center">SELECCIONE EL SISTEMA A UTILIZAR</h4>
+          <table class="table table-striped table-hover table-bordered table-sm bg-white">
+        <thead>
+          <tr>
+            <td>ID</td>
+            <td>name</td>
+            <td>email</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for contact in contacts %}
+          <tr>
+            <td>{{contact.0}}</td>
+            <td>{{contact.1}}</td>
+            <td>{{contact.2}}</td>
+            <td>
+              <a href="/edit/{{contact.0}}" class="btn btn-secondary">edit</a>
+              <a href="/delete/{{contact.0}}" class="btn btn-danger btn-delete">delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
         </div>
       </div>
     
