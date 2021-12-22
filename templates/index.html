@@ -19,10 +19,10 @@
                 Corte
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/GBN1">GBN1</a>
-                <a class="dropdown-item" href="/SLC">SLC</a>
-                <a class="dropdown-item" href="/NST">NST</a>
-                <a class="dropdown-item" href="/GBM">GBM</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="GBN1") }}>GBN1</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="SLC") }}>SLC</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="NST") }}>NST</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="GBM") }}>GBM</a>
               </div>
             </li>
             <li class="nav-item dropdown">
@@ -30,12 +30,12 @@
                 Pegado
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/plantilla1">STF</a>
-                <a class="dropdown-item" href="/MRT1">MRT1</a>
-                <a class="dropdown-item" href="/MRT2">MRT2</a>
-                <a class="dropdown-item" href="/MRT3">MRT3</a>
-                <a class="dropdown-item" href="/MRT4">MRT4</a>
-                <a class="dropdown-item" href="/IDM">IDM</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="STF") }}>STF</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="MRT1") }}>MRT1</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="MRT2") }}>MRT2</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="MRT3") }}>MRT3</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="MRT4") }}>MRT4</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="IDM") }}>IDM</a>
               </div>
             </li>
             <li class="nav-item dropdown">
@@ -43,12 +43,12 @@
                 Agujereado
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/RVR">RVR</a>
-                <a class="dropdown-item" href="/CHN">CHN</a>
-                <a class="dropdown-item" href="/FTAL1">FTAL1</a>
-                <a class="dropdown-item" href="/KBT1">KBT1</a>
-                <a class="dropdown-item" href="/KBT2">KBT2</a>
-                <a class="dropdown-item" href="/VTP1">VTP1</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="RVR") }}>RVR</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="CHN") }}>CHN</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="FTAL1") }}>FTAL1</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="KBT1") }}>KBT1</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="KBT2") }}>KBT2</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="VTP1") }}>VTP1</a>
               </div>
             </li>
             <li class="nav-item dropdown">
@@ -56,9 +56,9 @@
                 Frentes
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/LEA">LEA</a>
-                <a class="dropdown-item" href="/PRS">PRS</a>
-                <a class="dropdown-item" href="/ALU">ALU</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="LEA") }}>LEA</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="PRS") }}>PRS</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="ALU") }}>ALU</a>
               </div>
             </li>
             <li class="nav-item dropdown">
@@ -66,9 +66,9 @@
                 Armado
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/INSUMOS">INSUMOS</a>
-                <a class="dropdown-item" href="/PLTER">PLTER</a>
-                <a class="dropdown-item" href="/HORNO">HORNO</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="INSUMOS") }}>INSUMOS</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="PLTER") }}>PLTER</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="HORNO") }}>HORNO</a>
               </div>
             </li>
             <li class="nav-item dropdown">
@@ -76,9 +76,9 @@
                 Control
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/PLACARD">PLACARD</a>
-                <a class="dropdown-item" href="/PEGADO">PEGADO</a>
-                <a class="dropdown-item" href="/AGUJEREADO">AGUJEREADO</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="PLACARD") }}>PLACARD</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="PEGADO") }}>PEGADO</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="AGUJEREADO") }}>AGUJEREADO</a>
               </div>
             </li>
             <li class="nav-item dropdown">
@@ -86,7 +86,7 @@
                 Informes
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/DESPACHO">DESPACHO</a>
+                <a class="dropdown-item" href={{ url_for('index3' , maquina="DESPACHO", templete='index3') }}>DESPACHO</a>
               </div>
             </li>
           </ul>
@@ -102,28 +102,6 @@
         <div class="col-md-12 order-md-1">
           <br>
           <h4 class="mb-3 text-center">SELECCIONE EL SISTEMA A UTILIZAR</h4>
-          <table class="table table-striped table-hover table-bordered table-sm bg-white">
-        <thead>
-          <tr>
-            <td>ID</td>
-            <td>name</td>
-            <td>email</td>
-          </tr>
-        </thead>
-        <tbody>
-          {% for contact in contacts %}
-          <tr>
-            <td>{{contact.0}}</td>
-            <td>{{contact.1}}</td>
-            <td>{{contact.2}}</td>
-            <td>
-              <a href="/edit/{{contact.0}}" class="btn btn-secondary">edit</a>
-              <a href="/delete/{{contact.0}}" class="btn btn-danger btn-delete">delete</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
         </div>
       </div>
     

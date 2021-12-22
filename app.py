@@ -24,168 +24,59 @@ def index():
     return render_template("index.html", contacts=data)
 
 
-@app.route('/escanear_codigo', methods=['POST'])
-def escanear_codigo():
+@app.route('/index1/<string:maquina>')
+def index1(maquina):
+    complete = 'SELECT TOP 5 idPieza, PIEZA_DESCRIPCION FROM basePiezas ORDER BY ' \
+               'fechaLectura' + maquina + ' DESC'
+    cursor = con.cursor()
+    cursor.execute(complete)
+    data = cursor.fetchall()
+    cursor.close()
+    cursor = con.cursor()
+    cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
+    data2 = cursor.fetchall()
+    cursor.close()
+    return render_template("index1.html", maquina=maquina, piezas=data, ops=data2)
+
+
+@app.route('/index2/<string:maquina>')
+def index2(maquina):
+    complete = 'SELECT TOP 5 idPieza, PIEZA_DESCRIPCION FROM basePiezas ORDER BY ' \
+               'fechaLectura' + maquina + ' DESC'
+    cursor = con.cursor()
+    cursor.execute(complete)
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template("index2.html", maquina=maquina, piezas=data)
+
+
+@app.route('/index3/<string:maquina>')
+def index3(maquina):
+    cursor = con.cursor()
+    cursor.execute('SELECT * FROM dbo.Persons')
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template("index3.html", maquina=maquina)
+
+
+@app.route('/escanear_codigo/<string:maq>/<string:templete>', methods=['POST'])
+def escanear_codigo(maq, templete):
     if request.method == 'POST':
-        maquina = request.form['maquina']
         codigo = request.form['cod_escaneado']
+        complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate() WHERE idPieza = ?'
         cursor = con.cursor()
-        cursor.execute('SELECT idPieza, PIEZA_DESCRIPCION FROM dbo.basePiezas WHERE idPieza=?', int(codigo))
-        data2 = cursor.fetchall()
+        cursor.execute(complete , codigo)
+        cursor.commit()
         cursor.close()
         flash('Codigo escaneado correctamente')
-        return redirect(url_for(maquina.lower()))
+        return redirect(url_for(templete, maquina=maq))
 
 
-@app.route('/dar_id')
-def dar_id(id2):
-    id = id2
-    return redirect(url_for(id.lower()))
-
-
-@app.route('/plantilla1')
-def plantilla1():
-    return render_template('plantilla1.html')
-
-
-@app.route('/GBN1')
-def gbn1():
-    if request.method == 'POST':
-        maquina = request.form['maquina']
-        codigo = request.form['cod_escaneado']
-        cursor = con.cursor()
-        cursor.execute('SELECT TOP 5 idPieza, PIEZA_DESCRIPCION FROM dbo.basePiezas '
-                       'WHERE fechaLecturaPEGADO is not null ORDER BY fechaLecturaPEGADO')
-        data2 = cursor.fetchall()
-        cursor.close()
-        flash('Codigo escaneado correctamente')
-        return render_template('Corte/GBN1.html', piezas=data2)
-
-
-@app.route('/SLC')
-def slc():
-    return render_template('Corte/SLC.html')
-
-
-@app.route('/NST')
-def nst():
-    return render_template('Corte/NST.html')
-
-
-@app.route('/GBM')
-def gbm():
-    return render_template('Corte/GBM.html')
-
-
-@app.route('/STF')
-def stf():
-    return render_template('Pegado/STF.html')
-
-
-@app.route('/MRT1')
-def mrt1():
-    return render_template('Pegado/MRT1.html')
-
-
-@app.route('/MRT2')
-def mrt2():
-    return render_template('Pegado/MRT2.html')
-
-
-@app.route('/MRT3')
-def mrt3():
-    return render_template('Pegado/MRT3.html')
-
-
-@app.route('/MRT4')
-def mrt4():
-    return render_template('Pegado/MRT4.html')
-
-
-@app.route('/IDM')
-def idm():
-    return render_template('Pegado/IDM.html')
-
-
-@app.route('/RVR')
-def rvr():
-    return render_template('Agujereado/RVR.html')
-
-
-@app.route('/CHN')
-def chn():
-    return render_template('Agujereado/CHN.html')
-
-
-@app.route('/FTAL1')
-def ftal1():
-    return render_template('Agujereado/FTAL1.html')
-
-
-@app.route('/KBT1')
-def kbt1():
-    return render_template('Agujereado/KBT1.html')
-
-
-@app.route('/KBT2')
-def kbt2():
-    return render_template('Agujereado/KBT2.html')
-
-
-@app.route('/VTP1')
-def vtp1():
-    return render_template('Agujereado/VTP1.html')
-
-
-@app.route('/LEA')
-def lea():
-    return render_template('Frentes/LEA.html')
-
-
-@app.route('/PRS')
-def prs():
-    return render_template('Frentes/PRS.html')
-
-
-@app.route('/ALU')
-def alu():
-    return render_template('Frentes/ALU.html')
-
-
-@app.route('/INSUMOS')
-def insumos():
-    return render_template('Armado/INSUMOS.html')
-
-
-@app.route('/PLTER')
-def plter():
-    return render_template('Armado/PLTER.html')
-
-
-@app.route('/HORNO')
-def horno():
-    return render_template('Armado/HORNO.html')
-
-
-@app.route('/PLACARD')
-def placard():
-    return render_template('Control/PLACARD.html')
-
-
-@app.route('/PEGADO')
-def pegado():
-    return render_template('Control/PEGADO.html')
-
-
-@app.route('/AGUJEREADO')
-def agujereado():
-    return render_template('Control/AGUJEREADO.html')
-
-
-@app.route('/DESPACHO')
-def despacho():
-    return render_template('Informes/DESPACHO.html')
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/list_op')
+def list_op(id):
+    maq = id
+    cursor = con.cursor()
+    cursor.execute('select distinct op from basePiezas')
+    cursor.commit()
+    cursor.close()
+    return redirect(url_for(maq.lower()))
