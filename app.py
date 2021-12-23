@@ -32,10 +32,7 @@ def index1(maquina):
     cursor.execute(complete)
     data = cursor.fetchall()
     cursor.close()
-    cursor = con.cursor()
-    cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
-    data2 = cursor.fetchall()
-    cursor.close()
+    data2 = lista_op()
     return render_template("index1.html", maquina=maquina, piezas=data, ops=data2)
 
 
@@ -63,20 +60,43 @@ def index3(maquina):
 def escanear_codigo(maq, templete):
     if request.method == 'POST':
         codigo = request.form['cod_escaneado']
-        complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate() WHERE idPieza = ?'
-        cursor = con.cursor()
-        cursor.execute(complete , codigo)
-        cursor.commit()
-        cursor.close()
-        flash('Codigo escaneado correctamente')
-        return redirect(url_for(templete, maquina=maq))
+        if verificacion(codigo, maq) == '' or verificacion(codigo, maq) == None:
+            complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate() WHERE idPieza = ?'
+            cursor = con.cursor()
+            cursor.execute(complete, codigo)
+            cursor.commit()
+            cursor.close()
+            return redirect(url_for(templete, maquina=maq))
+        else:
+            flash('El codigo ' + codigo + ' ya fue escaneado')
+            return redirect(url_for(templete, maquina=maq))
 
 
-@app.route('/list_op')
-def list_op(id):
-    maq = id
+"""@app.route('dar_bajas/<string:maq>', methods=["GET", "POST"])
+def dar_bajas(maq):
     cursor = con.cursor()
-    cursor.execute('select distinct op from basePiezas')
+    cursor.execute('SELECT DISTINCT CODIGO_COLOR FROM basePiezas WHERE OP=?', maq)
     cursor.commit()
+    cursor.close() """
+
+
+
+def verificacion(id, maq):
+    complete = "SELECT fechaLectura" + maq + " FROM basePiezas WHERE idPieza=?"
+    cursor = con.cursor()
+    cursor.execute(complete, id)
+    data = cursor.fetchone()
     cursor.close()
-    return redirect(url_for(maq.lower()))
+    return data[0]
+
+def lista_op():
+    data = []
+    cursor = con.cursor()
+    cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
+    for row in cursor:
+        indice = str(row).index(",")
+        row2 = str(row)[2:indice - 1]
+        row3 = row2.replace(" ", "-")
+        data.append(row3)
+    cursor.close()
+    return data

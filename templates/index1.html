@@ -40,7 +40,7 @@
                     {% with messages = get_flashed_messages()  %}
                     {% if messages %}
                     {% for message in messages %}
-                      <div class="alert alert-success alert-dismissible fade show" role="alert">
+                      <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         {{ message }}
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
@@ -80,9 +80,9 @@
                     <h4 class="mb-3">Lectura masiva de piezas</h4>
                     <form>
                     <div class="form-group">
-                        <label for="op2">OP:</label>
-                        <input list="datalist_ops" type="text" class="form-control" id="op2" placeholder="OP">
-                        <datalist id="datalist_ops">
+                        <label for="ops">OP:</label>
+                        <input list="list_ops" type="text" class="form-control" id="ops" placeholder="OP">
+                        <datalist id="list_ops">
                         {% for op in ops %}
                         <option value={{ op }}>
                         {% endfor %}
@@ -91,15 +91,26 @@
                     <div class="row">
                         <div class="col">
                             <label for="color">Color:</label>
-                            <input type="text" class="form-control" id="color" placeholder="Color">
+                            <input list="list_colores" type="text" class="form-control" id="color" placeholder="Color">
+                            <datalist id="list_colores">
+                            {% for color in colores %}
+                            <option value={{ color }}>
+                            {% endfor %}
+                            </datalist>
                         </div>
                         <div class="col">
                             <label for="espesor">Espesor:</label>
-                            <input type="text"  id="espesor" class="form-control" placeholder="Espesor">
+                            <input list="list_espesores" type="text"  id="espesor" class="form-control" placeholder="Espesor">
+                            <datalist id="list_espesores">
+                            {% for espesor in espesores %}
+                            <option value={{ espesor }}>
+                            {% endfor %}
+                            </datalist>
                         </div>
                     </div>
-                    <div><br></div>
+                    <div><br> <p>Piezas totales seleccionadas: </p> </div>
                     <button type="submit" class="btn btn-success">Dar de bajas piezas</button>
+
                     </form>
                 </div>
             </div>
@@ -128,6 +139,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <!--  <script src="{{url_for('static', filename='js/main.js')}}"></script> -->
-        </body>
+    </body>
 
 </html>
