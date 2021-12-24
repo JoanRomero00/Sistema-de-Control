@@ -46,3 +46,14 @@ for row in cursor:
 cursor.close()
 
 print(data)
+
+data = []
+cursor = con.cursor()
+cursor.execute('SELECT DISTINCT PIEZA_PROFUNDO FROM basePiezas')
+for row in cursor:
+    indice = str(row).index(",")
+    row2 = str(row)[1:indice]
+    data.append(row2)
+cursor.close()
+
+print(data)

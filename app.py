@@ -17,11 +17,7 @@ app.secret_key = "mysecretkey"
 
 @app.route('/')
 def index():
-    cursor = con.cursor()
-    cursor.execute('SELECT * FROM dbo.Persons')
-    data = cursor.fetchall()
-    cursor.close()
-    return render_template("index.html", contacts=data)
+    return render_template("index.html")
 
 
 @app.route('/index1/<string:maquina>')
@@ -33,26 +29,28 @@ def index1(maquina):
     data = cursor.fetchall()
     cursor.close()
     data2 = lista_op()
-    return render_template("index1.html", maquina=maquina, piezas=data, ops=data2)
+    data3 = lista_colores()
+    return render_template("index1.html", maquina=maquina, piezas=data, ops=data2, colores=data3,
+                           espesores=lista_espesores())
 
 
 @app.route('/index2/<string:maquina>')
 def index2(maquina):
-    complete = 'SELECT TOP 5 idPieza, PIEZA_DESCRIPCION FROM basePiezas ORDER BY ' \
-               'fechaLectura' + maquina + ' DESC'
-    cursor = con.cursor()
-    cursor.execute(complete)
-    data = cursor.fetchall()
-    cursor.close()
-    return render_template("index2.html", maquina=maquina, piezas=data)
+    if maquina == "HORNO":
+        tabla = "baseModulos"
+    else:
+        tabla = "basePiezas"
+        complete = 'SELECT TOP 5 idPieza, PIEZA_DESCRIPCION FROM ' + tabla + ' ORDER BY ' \
+                    'fechaLectura' + maquina + ' DESC'
+        cursor = con.cursor()
+        cursor.execute(complete)
+        data = cursor.fetchall()
+        cursor.close()
+        return render_template("index2.html", maquina=maquina, piezas=data)
 
 
 @app.route('/index3/<string:maquina>')
 def index3(maquina):
-    cursor = con.cursor()
-    cursor.execute('SELECT * FROM dbo.Persons')
-    data = cursor.fetchall()
-    cursor.close()
     return render_template("index3.html", maquina=maquina)
 
 
@@ -60,7 +58,7 @@ def index3(maquina):
 def escanear_codigo(maq, templete):
     if request.method == 'POST':
         codigo = request.form['cod_escaneado']
-        if verificacion(codigo, maq) == '' or verificacion(codigo, maq) == None:
+        if verificacion(codigo, maq) == '' or verificacion(codigo, maq) is None:
             complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate() WHERE idPieza = ?'
             cursor = con.cursor()
             cursor.execute(complete, codigo)
@@ -72,15 +70,6 @@ def escanear_codigo(maq, templete):
             return redirect(url_for(templete, maquina=maq))
 
 
-"""@app.route('dar_bajas/<string:maq>', methods=["GET", "POST"])
-def dar_bajas(maq):
-    cursor = con.cursor()
-    cursor.execute('SELECT DISTINCT CODIGO_COLOR FROM basePiezas WHERE OP=?', maq)
-    cursor.commit()
-    cursor.close() """
-
-
-
 def verificacion(id, maq):
     complete = "SELECT fechaLectura" + maq + " FROM basePiezas WHERE idPieza=?"
     cursor = con.cursor()
@@ -88,6 +77,7 @@ def verificacion(id, maq):
     data = cursor.fetchone()
     cursor.close()
     return data[0]
+
 
 def lista_op():
     data = []
@@ -98,5 +88,30 @@ def lista_op():
         row2 = str(row)[2:indice - 1]
         row3 = row2.replace(" ", "-")
         data.append(row3)
+    cursor.close()
+    return data
+
+
+def lista_colores():
+    data = []
+    cursor = con.cursor()
+    cursor.execute('SELECT DISTINCT CODIGO_COLOR FROM basePiezas ORDER BY CODIGO_COLOR')
+    for row in cursor:
+        indice = str(row).index(",")
+        row2 = str(row)[2:indice-1]
+        row3 = row2.replace(" ", "-")
+        data.append(row3)
+    cursor.close()
+    return data
+
+
+def lista_espesores():
+    data = []
+    cursor = con.cursor()
+    cursor.execute('SELECT DISTINCT PIEZA_PROFUNDO FROM basePiezas ORDER BY PIEZA_PROFUNDO')
+    for row in cursor:
+        indice = str(row).index(",")
+        row2 = str(row)[1:indice]
+        data.append(row2)
     cursor.close()
     return data
