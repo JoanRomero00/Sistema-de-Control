@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import pyodbc
 
 app = Flask(__name__)
@@ -28,25 +28,25 @@ def index1(maquina):
     cursor.execute(complete)
     data = cursor.fetchall()
     cursor.close()
-    data2 = lista_op()
-    data3 = lista_colores()
-    return render_template("index1.html", maquina=maquina, piezas=data, ops=data2, colores=data3,
-                           espesores=lista_espesores())
+    list = []
+    for o in lista_op():
+        list.append(o['OP'])
+    return render_template("index1.html", maquina=maquina, piezas=data, ops=list)
 
 
 @app.route('/index2/<string:maquina>')
 def index2(maquina):
     if maquina == "HORNO":
-        tabla = "baseModulos"
+        complete = 'SELECT TOP 5 idOrdenManufactura, SO FROM baseModulos ORDER BY ' \
+                   'fechaLecturaHorno DESC'
     else:
-        tabla = "basePiezas"
-        complete = 'SELECT TOP 5 idPieza, PIEZA_DESCRIPCION FROM ' + tabla + ' ORDER BY ' \
-                    'fechaLectura' + maquina + ' DESC'
-        cursor = con.cursor()
-        cursor.execute(complete)
-        data = cursor.fetchall()
-        cursor.close()
-        return render_template("index2.html", maquina=maquina, piezas=data)
+        complete = 'SELECT TOP 5 idPieza, PIEZA_DESCRIPCION FROM basePiezas ORDER BY ' \
+                'fechaLectura' + maquina + ' DESC'
+    cursor = con.cursor()
+    cursor.execute(complete)
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template("index2.html", maquina=maquina, piezas=data)
 
 
 @app.route('/index3/<string:maquina>')
@@ -59,7 +59,10 @@ def escanear_codigo(maq, templete):
     if request.method == 'POST':
         codigo = request.form['cod_escaneado']
         if verificacion(codigo, maq) == '' or verificacion(codigo, maq) is None:
-            complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate() WHERE idPieza = ?'
+            if maq == "HORNO":
+                complete = 'UPDATE dbo.baseModulos SET fechaLecturaHorno = getdate() WHERE idOrdenManufactura = ?'
+            else:
+                complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate() WHERE idPieza = ?'
             cursor = con.cursor()
             cursor.execute(complete, codigo)
             cursor.commit()
@@ -70,8 +73,20 @@ def escanear_codigo(maq, templete):
             return redirect(url_for(templete, maquina=maq))
 
 
+@app.route("/carbrand",methods=["POST","GET"])
+def carbrand():
+    if request.method == 'POST':
+        category_id = request.form['category_id']
+        print(category_id)
+        OutputArray = lista_espesores(category_id)
+    return jsonify(OutputArray)
+
+
 def verificacion(id, maq):
-    complete = "SELECT fechaLectura" + maq + " FROM basePiezas WHERE idPieza=?"
+    if maq == "HORNO":
+        complete = "SELECT fechaLecturaHorno FROM baseModulos WHERE idOrdenManufactura=?"
+    else:
+        complete = "SELECT fechaLectura" + maq + " FROM basePiezas WHERE idPieza=?"
     cursor = con.cursor()
     cursor.execute(complete, id)
     data = cursor.fetchone()
@@ -80,7 +95,7 @@ def verificacion(id, maq):
 
 
 def lista_op():
-    data = []
+    """data = []
     cursor = con.cursor()
     cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
     for row in cursor:
@@ -89,13 +104,23 @@ def lista_op():
         row3 = row2.replace(" ", "-")
         data.append(row3)
     cursor.close()
-    return data
+    return data"""
+    cursor = con.cursor()
+    cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
+    records = cursor.fetchall()
+    OutputArray = []
+    columnNames = [column[0] for column in cursor.description]
+
+    for record in records:
+        OutputArray.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return OutputArray
 
 
 def lista_colores():
     data = []
     cursor = con.cursor()
-    cursor.execute('SELECT DISTINCT CODIGO_COLOR FROM basePiezas ORDER BY CODIGO_COLOR')
+    cursor.execute('SELECT DISTINCT PIEZA_NOMBRECOLOR FROM basePiezas ORDER BY PIEZA_NOMBRECOLOR')
     for row in cursor:
         indice = str(row).index(",")
         row2 = str(row)[2:indice-1]
@@ -105,13 +130,25 @@ def lista_colores():
     return data
 
 
-def lista_espesores():
-    data = []
+def lista_espesores(op):
+    """data = []
     cursor = con.cursor()
-    cursor.execute('SELECT DISTINCT PIEZA_PROFUNDO FROM basePiezas ORDER BY PIEZA_PROFUNDO')
+    cursor.execute('SELECT DISTINCT OP, PIEZA_PROFUNDO WHERE OP=? FROM basePiezas ORDER BY OP', op)
     for row in cursor:
         indice = str(row).index(",")
         row2 = str(row)[1:indice]
         data.append(row2)
     cursor.close()
-    return data
+    return data"""
+    cursor = con.cursor()
+    cursor.execute("SELECT DISTINCT OP, PIEZA_PROFUNDO FROM basePiezas WHERE OP=? ORDER BY OP", op)
+    records = cursor.fetchall()
+    OutputArray = []
+    columnNames = [column[0] for column in cursor.description]
+
+    for record in records:
+        OutputArray.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return OutputArray
+
+

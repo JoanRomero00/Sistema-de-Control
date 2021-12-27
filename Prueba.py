@@ -24,23 +24,27 @@ def verificacion(id, maq):
 data = []
 cursor = con.cursor()
 cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
-for row in cursor:
-    indice = str(row).index(",")
-    fila = str(row)[2:indice-1]
-    fila2 = fila.replace(" ","-")
-    data.append(fila2)
+records = cursor.fetchall()
+OutputArray = []
+columnNames = [column[0] for column in cursor.description]
+
+for record in records:
+    OutputArray.append( dict( zip( columnNames , record ) ) )
 cursor.close()
 
-print(str(data[1]))
-print(data)
-print(type(data[1]))
+#print(str(data[1]))
+for o in OutputArray:
+    print(o['OP'])
+print(OutputArray[0]['OP'])
+#print(outputObj[1])
+#print(type(data[1]))
 #print(type(data))
 #print(str(data[0]).index(","))
 #print(str(data[0])[2:16])
 
 data = []
 cursor = con.cursor()
-cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
+cursor.execute('SELECT DISTINCT OP, PIEZA_PROFUNDO FROM basePiezas ORDER BY OP')
 for row in cursor:
     data.append(row)
 cursor.close()
@@ -56,4 +60,4 @@ for row in cursor:
     data.append(row2)
 cursor.close()
 
-print(data)
+#print(data)
