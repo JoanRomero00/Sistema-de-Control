@@ -110,7 +110,6 @@ def lista_op():
     records = cursor.fetchall()
     OutputArray = []
     columnNames = [column[0] for column in cursor.description]
-
     for record in records:
         OutputArray.append(dict(zip(columnNames, record)))
     cursor.close()
@@ -145,7 +144,6 @@ def lista_espesores(op):
     records = cursor.fetchall()
     OutputArray = []
     columnNames = [column[0] for column in cursor.description]
-
     for record in records:
         OutputArray.append(dict(zip(columnNames, record)))
     cursor.close()

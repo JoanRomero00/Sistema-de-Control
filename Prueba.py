@@ -33,9 +33,9 @@ for record in records:
 cursor.close()
 
 #print(str(data[1]))
-for o in OutputArray:
-    print(o['OP'])
-print(OutputArray[0]['OP'])
+#for o in OutputArray:
+#    print(o['OP'])
+#print(OutputArray[0]['OP'])
 #print(outputObj[1])
 #print(type(data[1]))
 #print(type(data))
@@ -49,7 +49,7 @@ for row in cursor:
     data.append(row)
 cursor.close()
 
-print(data)
+#print(data)
 
 data = []
 cursor = con.cursor()
@@ -61,3 +61,31 @@ for row in cursor:
 cursor.close()
 
 #print(data)
+
+cursor = con.cursor()
+cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
+records = cursor.fetchall()
+OutputArray = []
+columnNames = [column[0] for column in cursor.description]
+
+for record in records:
+    OutputArray.append(dict(zip(columnNames, record)))
+cursor.close()
+
+print(OutputArray)
+
+list = []
+for o in OutputArray:
+    list.append(o['OP'])
+print(list)
+print(list[0])
+
+data = []
+cursor = con.cursor()
+cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
+for row in cursor:
+    data.append(row)
+cursor.close()
+
+print(data)
+print(data[0])
