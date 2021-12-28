@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        -->
-      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
-    <title>Sistema de control</title>
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
+     <title>Sistema de control</title>
   </head>
     <body class="bg-light">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -81,7 +81,7 @@
                     <h2 class="mb-3 text-center">{{ maquina }}</h2>
                     <h2 class="mb-3 text-center">{{ ver }}</h2>
                     <h4 class="mb-3">Lectura masiva de piezas</h4>
-                    <form>
+                <!--    <form>
                     <div class="form-group">
                         <label for="ops">OP:</label>
                         <input list="list_ops" type="text" class="form-control" id="ops" name="op"
@@ -115,24 +115,36 @@
                     <div><br> <p>Piezas totales seleccionadas: {{ cantidad }} </p> </div>
                     <button type="submit" class="btn btn-success">Dar de bajas piezas</button>
 
-                    </form>
-
+                    </form> -->
+                <form>
                 <div class="container">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label>Select Car</label>
-                            <select name="car_brand" data-live-search="true" id="car_brand" class="form-control" title="Select Car Brand">
+
+                        <div class="form-group">
+                            <label for="car_brand">OP:</label>
+                            <select name="car_brand" data-live-search="true" id="car_brand" class="form-control">
+                            <option selected>OP</option>
                             {% for row in ops %}
                             <option value="{{row}}">{{row}}</option>
                             {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label>Select Brand</label>
-                            <select name="car_models" data-live-search="true" id="car_models" class="form-control" title="Select Car Model"> </select>
+                        <div class="form-group">
+                            <label for="car_models">Color:</label>
+                            <select name="car_color" data-live-search="true" id="car_color" class="form-control">
+                            <option selected>Color</option>
+                            </select>
+
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <label for="car_models">Espesor:</label>
+                            <select name="car_models" data-live-search="true" id="car_models" class="form-control">
+                            <option selected>Espesor</option>
+                            </select>
+
+                        </div>
+
                 </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -158,10 +170,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
             <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
-        <script>
+        <!-- <script>
             $(document).ready(function () {
                 $("#car_brand").selectpicker();
-
                 $("#car_models").selectpicker();
 
                 function load_data(type, category_id) {
@@ -191,12 +202,119 @@
                     load_data("carModeldata", category_id);
                 });
             });
+        </script> -->
+            <!-- <script>
+            $(document).ready(function () {
+                $("#car_brand").selectpicker();
+                $("#car_color").selectpicker();
+                $("#car_models").selectpicker();
+
+                function load_data(type, category_id) {
+                    $.ajax({
+                        url: "/carbrand",
+                        method: "POST",
+                        data: { type: type, category_id: category_id },
+                        dataType: "json",
+                        success: function (data) { //alert(category_id)
+                            var html = "";
+                            if (type == "carColordata") {
+                            for (var count = 0; count < data.length; count++) {
+                                html += '<option value="' + data[count].OP + '">' + data[count].PIEZA_NOMBRECOLOR + "</option>";
+                            } } else { for (var count = 0; count < data.length; count++) {
+                                html += '<option value="' + data[count].OP + '">' + data[count].PIEZA_PROFUNDO + "</option>";
+                            } }
+                            if (type == "carData") {
+                                $("#car_brand").html(html);
+                                $("#car_brand").selectpicker("refresh");
+                            } else { if (type == "carColordata") {
+                                $("#car_color").html(html);
+                                $("#car_color").selectpicker("refresh");
+                                } else {
+                                $("#car_models").html(html);
+                                $("#car_models").selectpicker("refresh"); }
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#car_brand", function () {
+                    var category_id = $("#car_brand").val();
+                    load_data("carColordata", category_id);
+                    load_data("carModeldata", category_id);
+                });
+            });
+        </script> -->
+        <script>
+            $(document).ready(function () {
+                $("#car_brand").selectpicker();
+                $("#car_color").selectpicker();
+
+                function load_data(type, category_id) {
+                    $.ajax({
+                        url: "/carbrand",
+                        method: "POST",
+                        data: { type: type, category_id: category_id },
+                        dataType: "json",
+                        success: function (data) { //alert(category_id)
+                            var html = "<option selected>Color</option>";
+                            for (var count = 0; count < data.length; count++) {
+                                html += '<option value="' + data[count].OP + '">' + data[count].PIEZA_NOMBRECOLOR + "</option>";
+                            }
+                            if (type == "carData") {
+                                $("#car_brand").html(html);
+                                $("#car_brand").selectpicker("refresh");
+                            } else {
+                                $("#car_color").html(html);
+                                $("#car_color").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#car_brand", function () {
+                    var category_id = $("#car_brand").val();
+                    load_data("carColordata", category_id);
+                });
+            });
         </script>
-    <!--  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("#car_color").selectpicker();
+                $("#car_models").selectpicker();
+
+                function load_data(type, color) {
+                    $.ajax({
+                        url: "/carcolor",
+                        method: "POST",
+                        data: { type: type, color: color },
+                        dataType: "json",
+                        success: function (data) { //alert(color)
+                            var html = "<option selected>Espesor</option>";
+                            for (var count = 0; count < data.length; count++) {
+                                html += '<option value="' + data[count].PIEZA_NOMBRECOLOR + '">' + data[count].PIEZA_PROFUNDO + "</option>";
+                            }
+                            if (type == "carColor") {
+                                $("#car_color").html(html);
+                                $("#car_color").selectpicker("refresh");
+                            } else {
+                                $("#car_models").html(html);
+                                $("#car_models").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#car_color", function () {
+                    var color = $("#car_color").val();
+                    load_data("carModelsdata", color);
+                });
+            });
+        </script>
+            <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script> -->
-    </body>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script> -->
+        </body>
 
 </html>

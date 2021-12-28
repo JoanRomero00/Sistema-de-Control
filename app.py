@@ -78,10 +78,32 @@ def carbrand():
     if request.method == 'POST':
         category_id = request.form['category_id']
         print(category_id)
-        OutputArray = lista_espesores(category_id)
+        OutputArray = lista_colores(category_id)
     return jsonify(OutputArray)
 
 
+@app.route("/carcolor",methods=["POST","GET"])
+def carcolor():
+    if request.method == 'POST':
+        color = request.form['color']
+        #color = request.form['color']
+        print(color)
+        OutputArray = lista_espesores(color)#, color)
+    return jsonify(OutputArray)
+
+"""
+@app.route("/carbrand",methods=["POST","GET"])
+def carbrand():
+    if request.method == 'POST':
+        category_id = request.form['category_id']
+        print(category_id)
+        type = request.form['type']
+        if type == 'carColordata':
+            OutputArray = lista_colores(category_id)
+        else:
+            OutputArray = lista_espesores(category_id)
+    return jsonify(OutputArray)
+"""
 def verificacion(id, maq):
     if maq == "HORNO":
         complete = "SELECT fechaLecturaHorno FROM baseModulos WHERE idOrdenManufactura=?"
@@ -116,20 +138,28 @@ def lista_op():
     return OutputArray
 
 
-def lista_colores():
-    data = []
+def lista_colores(op):
+    """data = []
     cursor = con.cursor()
-    cursor.execute('SELECT DISTINCT PIEZA_NOMBRECOLOR FROM basePiezas ORDER BY PIEZA_NOMBRECOLOR')
+    cursor.execute('SELECT DISTINCT PIEZA_NOMBRECOLOR FROM basePiezas WHERE OP=? ORDER BY PIEZA_NOMBRECOLOR')
     for row in cursor:
         indice = str(row).index(",")
         row2 = str(row)[2:indice-1]
         row3 = row2.replace(" ", "-")
         data.append(row3)
     cursor.close()
-    return data
+    return data """
+    cursor = con.cursor()
+    cursor.execute("SELECT DISTINCT OP, PIEZA_NOMBRECOLOR FROM basePiezas WHERE OP=? ORDER BY OP", op)
+    records = cursor.fetchall()
+    OutputArray = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in records:
+        OutputArray.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return OutputArray
 
-
-def lista_espesores(op):
+def lista_espesores(color):
     """data = []
     cursor = con.cursor()
     cursor.execute('SELECT DISTINCT OP, PIEZA_PROFUNDO WHERE OP=? FROM basePiezas ORDER BY OP', op)
@@ -140,7 +170,10 @@ def lista_espesores(op):
     cursor.close()
     return data"""
     cursor = con.cursor()
-    cursor.execute("SELECT DISTINCT OP, PIEZA_PROFUNDO FROM basePiezas WHERE OP=? ORDER BY OP", op)
+    #cursor.execute("SELECT DISTINCT OP, PIEZA_NOMBRECOLOR, PIEZA_PROFUNDO FROM basePiezas WHERE OP=? AND"
+                   #" PIEZA_NOMBRECOLOR=? ORDER BY OP", op, color)
+    cursor.execute("SELECT DISTINCT OP, PIEZA_NOMBRECOLOR, PIEZA_PROFUNDO FROM basePiezas WHERE OP=? "
+                   "ORDER BY OP", color)
     records = cursor.fetchall()
     OutputArray = []
     columnNames = [column[0] for column in cursor.description]

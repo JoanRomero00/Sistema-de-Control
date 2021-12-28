@@ -72,13 +72,13 @@ for record in records:
     OutputArray.append(dict(zip(columnNames, record)))
 cursor.close()
 
-print(OutputArray)
+#print(OutputArray)
 
 list = []
 for o in OutputArray:
     list.append(o['OP'])
-print(list)
-print(list[0])
+#print(list)
+#print(list[0])
 
 data = []
 cursor = con.cursor()
@@ -87,5 +87,17 @@ for row in cursor:
     data.append(row)
 cursor.close()
 
-print(data)
-print(data[0])
+#print(data)
+#print(data[0])
+
+cursor = con.cursor()
+cursor.execute("SELECT DISTINCT OP, PIEZA_NOMBRECOLOR, PIEZA_PROFUNDO FROM basePiezas WHERE OP='W19-2105-05-UNIF' AND"
+                " PIEZA_NOMBRECOLOR='BLANCO OPACO' ORDER BY OP")
+records = cursor.fetchall()
+OutputArray = []
+columnNames = [column[0] for column in cursor.description]
+for record in records:
+    OutputArray.append(dict(zip(columnNames, record)))
+cursor.close()
+
+print(OutputArray)
