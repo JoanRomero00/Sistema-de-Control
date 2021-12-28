@@ -73,37 +73,27 @@ def escanear_codigo(maq, templete):
             return redirect(url_for(templete, maquina=maq))
 
 
-@app.route("/carbrand",methods=["POST","GET"])
-def carbrand():
+@app.route("/ops", methods=["POST", "GET"])
+def ops():
+    global OutputArray
     if request.method == 'POST':
-        category_id = request.form['category_id']
-        print(category_id)
-        OutputArray = lista_colores(category_id)
+        op = request.form['op']
+        print(op)
+        OutputArray = lista_colores(op)
     return jsonify(OutputArray)
 
 
-@app.route("/carcolor",methods=["POST","GET"])
-def carcolor():
+@app.route("/colores",methods=["POST","GET"])
+def colores():
+    global OutputArray
     if request.method == 'POST':
         color = request.form['color']
-        #color = request.form['color']
+        op = request.form['op']
         print(color)
-        OutputArray = lista_espesores(color)#, color)
+        OutputArray = lista_espesores(color,op)
     return jsonify(OutputArray)
 
-"""
-@app.route("/carbrand",methods=["POST","GET"])
-def carbrand():
-    if request.method == 'POST':
-        category_id = request.form['category_id']
-        print(category_id)
-        type = request.form['type']
-        if type == 'carColordata':
-            OutputArray = lista_colores(category_id)
-        else:
-            OutputArray = lista_espesores(category_id)
-    return jsonify(OutputArray)
-"""
+
 def verificacion(id, maq):
     if maq == "HORNO":
         complete = "SELECT fechaLecturaHorno FROM baseModulos WHERE idOrdenManufactura=?"
@@ -117,16 +107,6 @@ def verificacion(id, maq):
 
 
 def lista_op():
-    """data = []
-    cursor = con.cursor()
-    cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
-    for row in cursor:
-        indice = str(row).index(",")
-        row2 = str(row)[2:indice - 1]
-        row3 = row2.replace(" ", "-")
-        data.append(row3)
-    cursor.close()
-    return data"""
     cursor = con.cursor()
     cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
     records = cursor.fetchall()
@@ -139,16 +119,6 @@ def lista_op():
 
 
 def lista_colores(op):
-    """data = []
-    cursor = con.cursor()
-    cursor.execute('SELECT DISTINCT PIEZA_NOMBRECOLOR FROM basePiezas WHERE OP=? ORDER BY PIEZA_NOMBRECOLOR')
-    for row in cursor:
-        indice = str(row).index(",")
-        row2 = str(row)[2:indice-1]
-        row3 = row2.replace(" ", "-")
-        data.append(row3)
-    cursor.close()
-    return data """
     cursor = con.cursor()
     cursor.execute("SELECT DISTINCT OP, PIEZA_NOMBRECOLOR FROM basePiezas WHERE OP=? ORDER BY OP", op)
     records = cursor.fetchall()
@@ -159,21 +129,11 @@ def lista_colores(op):
     cursor.close()
     return OutputArray
 
-def lista_espesores(color):
-    """data = []
+
+def lista_espesores(color, op):
     cursor = con.cursor()
-    cursor.execute('SELECT DISTINCT OP, PIEZA_PROFUNDO WHERE OP=? FROM basePiezas ORDER BY OP', op)
-    for row in cursor:
-        indice = str(row).index(",")
-        row2 = str(row)[1:indice]
-        data.append(row2)
-    cursor.close()
-    return data"""
-    cursor = con.cursor()
-    #cursor.execute("SELECT DISTINCT OP, PIEZA_NOMBRECOLOR, PIEZA_PROFUNDO FROM basePiezas WHERE OP=? AND"
-                   #" PIEZA_NOMBRECOLOR=? ORDER BY OP", op, color)
     cursor.execute("SELECT DISTINCT OP, PIEZA_NOMBRECOLOR, PIEZA_PROFUNDO FROM basePiezas WHERE OP=? "
-                   "ORDER BY OP", color)
+                   "AND PIEZA_NOMBRECOLOR=? ORDER BY OP", op, color)
     records = cursor.fetchall()
     OutputArray = []
     columnNames = [column[0] for column in cursor.description]
@@ -181,5 +141,3 @@ def lista_espesores(color):
         OutputArray.append(dict(zip(columnNames, record)))
     cursor.close()
     return OutputArray
-
-
