@@ -51,7 +51,7 @@ def index2(maquina):
 
 @app.route('/index3/<string:maquina>')
 def index3(maquina):
-    return render_template("index3.html", maquina=maquina)
+    return render_template("index3.html", maquina=maquina, franquicias=lista_Fr(0), sos=lista_SO(0), clientes=lista_CF(0))
 
 
 @app.route('/escanear_codigo/<string:maq>/<string:templete>', methods=['POST'])
@@ -73,6 +73,30 @@ def escanear_codigo(maq, templete):
             return redirect(url_for(templete, maquina=maq))
 
 
+@app.route('/lectura_masiva/<string:maq>', methods=['POST'])
+def lectura_masiva(maq):
+    if request.method == 'POST':
+        op = request.form['ops']
+        color = request.form['colores']
+        espesor = request.form['espesores']
+        cursor = con.cursor()
+        cursor.execute("SELECT idPieza FROM basePiezas WHERE OP=? "
+                       "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=?", op, color, espesor)
+        records = cursor.fetchall()
+        ids = []
+        columnNames = [column[0] for column in cursor.description]
+        for record in records:
+            ids.append(dict(zip(columnNames, record)))
+        cursor.close()
+        for id in ids:
+            complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate() WHERE idPieza = ?'
+            cursor = con.cursor()
+            cursor.execute(complete, id['idPieza'])
+            cursor.commit()
+            cursor.close()
+        return redirect(url_for('index1', maquina=maq))
+
+
 @app.route("/ops", methods=["POST", "GET"])
 def ops():
     global OutputArray
@@ -92,6 +116,50 @@ def colores():
         print(color)
         OutputArray = lista_espesores(color,op)
     return jsonify(OutputArray)
+
+
+@app.route("/espesores",methods=["POST","GET"])
+def espesores():
+    global OutputArray
+    if request.method == 'POST':
+        op = request.form['op']
+        color = request.form['color']
+        espesor = request.form['espesor']
+        print(espesor + " , " + color + " , " + op )
+        cursor = con.cursor()
+        cursor.execute("SELECT COUNT(idPieza) as CANTIDAD FROM basePiezas WHERE OP=? "
+                       "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=?", op, color, espesor)
+        records = cursor.fetchall()
+        OutputArray = []
+        columnNames = [column[0] for column in cursor.description]
+        for record in records:
+            OutputArray.append(dict(zip(columnNames, record)))
+        cursor.close()
+    return jsonify(OutputArray)
+
+
+@app.route("/buscar_fr", methods=["POST", "GET"])
+def buscar_fr():
+    if request.method == 'POST':
+        op = request.form['op']
+        print(op)
+        return jsonify(lista_Fr(op))
+
+
+@app.route("/buscar_so", methods=["POST", "GET"])
+def buscar_so():
+    if request.method == 'POST':
+        color = request.form['color']
+        print(color)
+        return jsonify(lista_SO(color))
+
+
+@app.route("/buscar_cf", methods=["POST", "GET"])
+def buscar_cf():
+    if request.method == 'POST':
+        espesor = request.form['espesor']
+        print(espesor)
+        return jsonify(lista_SO(espesor))
 
 
 def verificacion(id, maq):
@@ -141,3 +209,45 @@ def lista_espesores(color, op):
         OutputArray.append(dict(zip(columnNames, record)))
     cursor.close()
     return OutputArray
+
+def lista_CF(op):
+    cursor = con.cursor()
+    if op == 0:
+        cursor.execute("SELECT DISTINCT CLIENTE_FINAL FROM baseModulos")
+    else:
+        cursor.execute("SELECT FRANQUICIA, SO, CLIENTE_FINAL, PT_PRODUCTO, OP FROM baseModulos WHERE CLIENTE_FINAL=?", op)
+    records = cursor.fetchall()
+    data = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in records:
+        data.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return data
+
+def lista_Fr(op):
+    cursor = con.cursor()
+    if op == 0:
+        cursor.execute("SELECT DISTINCT FRANQUICIA FROM baseModulos")
+    else:
+        cursor.execute("SELECT FRANQUICIA, SO, CLIENTE_FINAL, PT_PRODUCTO, OP FROM baseModulos WHERE FRANQUICIA=?", op)
+    records = cursor.fetchall()
+    data = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in records:
+        data.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return data
+
+def lista_SO(op):
+    cursor = con.cursor()
+    if op == 0:
+        cursor.execute("SELECT DISTINCT SO FROM baseModulos")
+    else:
+        cursor.execute("SELECT FRANQUICIA, SO, CLIENTE_FINAL, PT_PRODUCTO, OP FROM baseModulos WHERE SO=?", op)
+    records = cursor.fetchall()
+    data = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in records:
+        data.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return data

@@ -43,11 +43,11 @@
                     {% with messages = get_flashed_messages()  %}
                     {% if messages %}
                     {% for message in messages %}
-                      <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <div class="alert alert-danger" role="alert">
+                          <strong>{{ message }}</strong>
+                          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
-                        </button>
+                          </button>
                       </div>
                     {% endfor %}
                     {% endif %}
@@ -80,9 +80,8 @@
 
                 <div id="baja_op" style="display:none;">
                     <h2 class="mb-3 text-center">{{ maquina }}</h2>
-                    <h2 class="mb-3 text-center">{{ ver }}</h2>
                     <h4 class="mb-3">Lectura masiva de piezas</h4>
-                <form>
+                <form action={{url_for('lectura_masiva', maq=maquina)}} method="POST">
                 <div class="container">
 
                         <div class="form-group">
@@ -107,6 +106,8 @@
                             <option selected>Espesor</option>
                             </select>
                         </div>
+                    <div><label id="cantidad" name="cantidad"></label></div>
+                    <div><button type="submit" class="btn btn-success">Dar de baja piezas</button></div>
                 </div>
                 </form>
                 </div>
@@ -131,7 +132,7 @@
         }
     }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
             <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
         <script>
@@ -181,7 +182,7 @@
                         success: function (data) { //alert(color)
                             var html = "<option selected>Espesor</option>";
                             for (var count = 0; count < data.length; count++) {
-                                html += '<option value="' + data[count].PIEZA_NOMBRECOLOR + '">' + data[count].PIEZA_PROFUNDO + "</option>";
+                                html += '<option value="' + data[count].PIEZA_PROFUNDO + '">' + data[count].PIEZA_PROFUNDO + "</option>";
                             }
                             if (type == "Color") {
                                 $("#colores").html(html);
@@ -201,11 +202,42 @@
                 });
             });
         </script>
-            <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script> -->
-        </body>
+        <script>
+              $(document).ready(function () {
+                $("#ops").selectpicker();
+                $("#colores").selectpicker();
+                $("#espesores").selectpicker();
+
+                function load_data(type, op, color, espesor) {
+                    $.ajax({
+                        url: "/espesores",
+                        method: "POST",
+                        data: { type: type, op: op, color: color, espesor: espesor },
+                        dataType: "json",
+                        success: function (data) { //alert(espesor)
+                            var html = "";
+                            html += '<label value="' + data[0].CANTIDAD + '"> CANTIDAD DE PIEZAS SELECCIONADAS: ' + data[0].CANTIDAD + "</label>";
+
+                            if (type == "Espesor") {
+                                $("#espesores").html(html);
+                                $("#espesores").selectpicker("refresh");
+                            } else {
+                                $("#cantidad").html(html);
+                                $("#cantidad").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#espesores", function () {
+                    var op = $("#ops").val();
+                    var color = $("#colores").val();
+                    var espesor = $("#espesores").val();
+                    load_data("Cantidad", op, color, espesor);
+                });
+            });
+        </script>
+
+    </body>
 
 </html>

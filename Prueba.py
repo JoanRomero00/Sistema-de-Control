@@ -100,4 +100,55 @@ for record in records:
     OutputArray.append(dict(zip(columnNames, record)))
 cursor.close()
 
-print(OutputArray)
+#print(OutputArray)
+#print(OutputArray[0]['OP'])
+
+
+op = 'W50-2112-ADELANTO_IDEAS'
+color = 'BLANCO'
+espesor = 18
+cursor = con.cursor()
+cursor.execute("SELECT idPieza FROM basePiezas WHERE OP=? "
+                 "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=?", op, color, espesor)
+records = cursor.fetchall()
+ids = []
+columnNames = [column[0] for column in cursor.description]
+for record in records:
+    ids.append(dict(zip(columnNames, record)))
+cursor.close()
+#print(records)
+#print(ids)
+
+
+
+
+cursor = con.cursor()
+op='W50-2112-ADELANTO_IDEAS'
+color='BLANCO'
+cursor.execute("SELECT idPieza FROM basePiezas WHERE OP='W50-2112-ADELANTO_IDEAS' AND PIEZA_NOMBRECOLOR='BLANCO' AND PIEZA_PROFUNDO=15")
+records = cursor.fetchall()
+OutputArray = []
+columnNames = [column[0] for column in cursor.description]
+for record in records:
+    OutputArray.append(dict(zip(columnNames, record)))
+cursor.close()
+
+#print(OutputArray)
+#for id in OutputArray:
+    #print(id['idPieza'])
+
+def lista_CF(op):
+    cursor = con.cursor()
+    if op == 0:
+        cursor.execute("SELECT DISTINCT CLIENTE_FINAL FROM baseModulos")
+    else:
+        cursor.execute("SELECT FRANQUICIA, SO, CLIENTE_FINAL, PT_PRODUCTO, OP FROM baseModulos WHERE CLIENTE_FINAL=?", op)
+    records = cursor.fetchall()
+    data = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in records:
+        data.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return data
+
+print(lista_CF('Branson'))

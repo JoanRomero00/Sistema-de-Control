@@ -6,16 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <title>Sistema de control</title>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
+     <title>Sistema de control</title>
+
   </head>
     <body class="bg-light">
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="/">RENO</a>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav nav-tabs">
-            <li class="nav-item" onclick="myFunction(2)">
+            <li class="nav-item" onclick="myFunction(1)">
                 <a class="nav-link" href="#">########</a>
             </li>
           </ul>
@@ -28,24 +31,42 @@
             <div class="row">
 
             <div class="col-md-12 order-md-1">
-
-                <div id="etiqueta">
+                <div id="baja_op">
                     <h2 class="mb-3 text-center">{{ maquina }}</h2>
-                    <form>
-                    <div class="form-group">
-                        <label for="op">Franquicia:</label>
-                        <input type="text" class="form-control" id="op" placeholder="FRANQUICIA">
-                    </div>
-                    <div class="form-group">
-                        <label for="op">SO:</label>
-                        <input type="text" class="form-control" id="op" placeholder="SO">
-                    </div>
-                    <div class="form-group">
-                        <label for="op">Cliente Final:</label>
-                        <input type="text" class="form-control" id="op" placeholder="CF">
-                    </div>
-                    </form>
-                    <br> <br>
+
+
+
+
+                            <label for="ops">Franquicia:</label>
+                            <select name="ops" data-live-search="true" id="ops" class="form-control">
+                            <option selected>Fr</option>
+                            {% for row in franquicias %}
+                            <option value="{{row['FRANQUICIA']}}">{{row['FRANQUICIA']}}</option>
+                            {% endfor %}
+                            </select>
+                    <br><br>
+
+                            <label for="colores">SO:</label>
+                            <select name="colores" data-live-search="true" id="colores" class="form-control">
+                            <option selected>SO</option>
+                            {% for row in sos %}
+                            <option value="{{row['SO']}}">{{row['SO']}}</option>
+                            {% endfor %}
+                            </select>
+                    <br><br>
+
+                            <label for="espesores">Cliente Final:</label>
+                            <select name="espesores" data-live-search="true" id="espesores" class="form-control">
+                            <option selected>CF</option>
+                            {% for row in clientes %}
+                            <option value="{{row['CLIENTE_FINAL']}}">{{row['CLIENTE_FINAL']}}</option>
+                            {% endfor %}
+                            </select>
+
+
+
+
+                    <br><br>
                     <table class="table table-dark table-striped">
                             <thead>
                             <tr>
@@ -54,42 +75,120 @@
                                 <th scope="col">CLIENTE_FINAL</th>
                                 <th scope="col">PT_PRODUCTO</th>
                                 <th scope="col">OP</th>
-                                <th scope="col">T</th>
-                                <th scope="col">P</th>
+                                <!--<th scope="col">T</th>
+                                <th scope="col">P</th> -->
                             </tr>
                             </thead>
-                            <tbody>
-                            <tr>
-                                <th scope="row"></th>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"></th>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
+                            <tbody id="tabla" name="tabla">
                             </tbody>
-                        </table>
+                    </table>
                 </div>
-
             </div>
         </div>
 
-    <!--  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script> -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <!--  <script src="{{url_for('static', filename='js/main.js')}}"></script> -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("#ops").selectpicker();
 
-    </body>
+                function load_data(type, op) {
+                    $.ajax({
+                        url: "/buscar_fr",
+                        method: "POST",
+                        data: { type: type, op: op },
+                        dataType: "json",
+                        success: function (data) { //alert(op)
+                            var html = "";
+                            for (var count = 0; count < data.length; count++) {
+                                html += '<tr><td>' + data[count].FRANQUICIA + "</td>" +
+                                '<td>' + data[count].SO + "</td>" +
+                                '<td>' + data[count].CLIENTE_FINAL + "</td>" +
+                                '<td>' + data[count].PT_PRODUCTO + "</td>" +
+                                '<td>' + data[count].OP + "</td></tr>";
+                            }
+                            if (type == "FR") {
+                                $("#tabla").html(html);
+                                $("#tabla").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#ops", function () {
+                    var op = $("#ops").val();
+                    load_data("FR", op);
+                });
+            });
+        </script>
+        <script>
+            $(document).ready(function () {
+                $("#colores").selectpicker();
+
+                function load_data(type, color) {
+                    $.ajax({
+                        url: "/buscar_so",
+                        method: "POST",
+                        data: { type: type, color: color },
+                        dataType: "json",
+                        success: function (data) { //alert(color)
+                            var html = "";
+                            for (var count = 0; count < data.length; count++) {
+                                html += '<tr><td>' + data[count].FRANQUICIA + "</td>" +
+                                '<td>' + data[count].SO + "</td>" +
+                                '<td>' + data[count].CLIENTE_FINAL + "</td>" +
+                                '<td>' + data[count].PT_PRODUCTO + "</td>" +
+                                '<td>' + data[count].OP + "</td></tr>";
+                            }
+                            if (type == "SO") {
+                                $("#tabla").html(html);
+                                $("#tabla").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#colores", function () {
+                    var color = $("#colores").val();
+                    load_data("SO", color);
+                });
+            });
+        </script>
+        <script>
+              $(document).ready(function () {
+                $("#espesores").selectpicker();
+
+                function load_data(type, espesor) {
+                    $.ajax({
+                        url: "/buscar_cf",
+                        method: "POST",
+                        data: { type: type, espesor: espesor },
+                        dataType: "json",
+                        success: function (data) { //alert(espesor)
+                            var html = "";
+                            for (var count = 0; count < data.length; count++) {
+                                html += '<tr><td>' + data[count].FRANQUICIA + "</td>" +
+                                '<td>' + data[count].SO + "</td>" +
+                                '<td>' + data[count].CLIENTE_FINAL + "</td>" +
+                                '<td>' + data[count].PT_PRODUCTO + "</td>" +
+                                '<td>' + data[count].OP + "</td></tr>";
+                            }
+                            if (type == "CF") {
+                                $("#tabla").html(html);
+                                $("#tabla").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#espesores", function () {
+                    var espesor = $("#espesores").val();
+                    load_data("CF", espesor);
+                });
+            });
+        </script>
+
+        </body>
 
 </html>
