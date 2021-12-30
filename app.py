@@ -37,7 +37,7 @@ def index1(maquina):
 @app.route('/index2/<string:maquina>')
 def index2(maquina):
     if maquina == "HORNO":
-        complete = 'SELECT TOP 5 idOrdenManufactura, SO FROM baseModulos ORDER BY ' \
+        complete = 'SELECT TOP 5 idOrdenManufactura, PT_PRODUCTO FROM baseModulos ORDER BY ' \
                    'fechaLecturaHorno DESC'
     else:
         complete = 'SELECT TOP 5 idPieza, PIEZA_DESCRIPCION FROM basePiezas ORDER BY ' \
@@ -51,25 +51,28 @@ def index2(maquina):
 
 @app.route('/index3/<string:maquina>')
 def index3(maquina):
-    return render_template("index3.html", maquina=maquina, franquicias=lista_Fr(0), sos=lista_SO(0), clientes=lista_CF(0))
+    return render_template("index3.html", maquina=maquina, sos=lista_SO(0), clientes=lista_CF(0))
 
 
 @app.route('/escanear_codigo/<string:maq>/<string:templete>', methods=['POST'])
 def escanear_codigo(maq, templete):
     if request.method == 'POST':
         codigo = request.form['cod_escaneado']
-        if verificacion(codigo, maq) == '' or verificacion(codigo, maq) is None:
+        if verificacion(codigo, maq) == 1:
+            flash('El codigo ' + codigo + ' ya fue escaneado')
+            return redirect(url_for(templete, maquina=maq))
+        elif verificacion(codigo, maq) == None:
+            flash('Codigo ingresado incorrecto. Intente de nuevo')
+            return redirect(url_for(templete, maquina=maq))
+        else:
             if maq == "HORNO":
-                complete = 'UPDATE dbo.baseModulos SET fechaLecturaHorno = getdate() WHERE idOrdenManufactura = ?'
+                complete = 'UPDATE dbo.baseModulos SET fechaLecturaHorno = getdate(), lecturaHorno = 1 WHERE idOrdenManufactura = ?'
             else:
-                complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate() WHERE idPieza = ?'
+                complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate(), lectura' + maq + ' = 1 WHERE idPieza = ?'
             cursor = con.cursor()
             cursor.execute(complete, codigo)
             cursor.commit()
             cursor.close()
-            return redirect(url_for(templete, maquina=maq))
-        else:
-            flash('El codigo ' + codigo + ' ya fue escaneado')
             return redirect(url_for(templete, maquina=maq))
 
 
@@ -89,12 +92,18 @@ def lectura_masiva(maq):
             ids.append(dict(zip(columnNames, record)))
         cursor.close()
         for id in ids:
-            complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate() WHERE idPieza = ?'
+            complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate(), lectura' + maq + ' = 1 WHERE idPieza = ?'
             cursor = con.cursor()
             cursor.execute(complete, id['idPieza'])
             cursor.commit()
             cursor.close()
+        flash("Lectura masiva realizada con exito. \n OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor)
         return redirect(url_for('index1', maquina=maq))
+
+
+@app.errorhandler(500)
+def access_error(error):
+    return render_template('error.html'), 500
 
 
 @app.route("/ops", methods=["POST", "GET"])
@@ -138,12 +147,12 @@ def espesores():
     return jsonify(OutputArray)
 
 
-@app.route("/buscar_fr", methods=["POST", "GET"])
-def buscar_fr():
+@app.route("/buscar_cf", methods=["POST", "GET"])
+def buscar_cf():
     if request.method == 'POST':
         op = request.form['op']
         print(op)
-        return jsonify(lista_Fr(op))
+        return jsonify(lista_CF(op))
 
 
 @app.route("/buscar_so", methods=["POST", "GET"])
@@ -154,24 +163,27 @@ def buscar_so():
         return jsonify(lista_SO(color))
 
 
-@app.route("/buscar_cf", methods=["POST", "GET"])
+"""@app.route("/buscar_cf", methods=["POST", "GET"])
 def buscar_cf():
     if request.method == 'POST':
-        espesor = request.form['espesor']
-        print(espesor)
-        return jsonify(lista_SO(espesor))
+        op = request.form['op']
+        print(op)
+        return jsonify(lista_SO(op))"""
 
 
 def verificacion(id, maq):
     if maq == "HORNO":
-        complete = "SELECT fechaLecturaHorno FROM baseModulos WHERE idOrdenManufactura=?"
+        complete = "SELECT (CASE WHEN lecturahorno >= 1 THEN 1 ELSE 0 END) as VER FROM baseModulos WHERE idOrdenManufactura=?"
     else:
-        complete = "SELECT fechaLectura" + maq + " FROM basePiezas WHERE idPieza=?"
+        complete = "SELECT (CASE WHEN lectura" + maq + " >= 1 THEN 1 ELSE 0 END) FROM basePiezas WHERE idPieza=?"
     cursor = con.cursor()
     cursor.execute(complete, id)
     data = cursor.fetchone()
+    print(type(data))
     cursor.close()
-    return data[0]
+    if data is not None:
+        data = data[0]
+    return data
 
 
 def lista_op():
@@ -213,9 +225,13 @@ def lista_espesores(color, op):
 def lista_CF(op):
     cursor = con.cursor()
     if op == 0:
-        cursor.execute("SELECT DISTINCT CLIENTE_FINAL FROM baseModulos")
+        cursor.execute("SELECT DISTINCT CLIENTE_FINAL FROM baseModulos ORDER BY CLIENTE_FINAL")
     else:
-        cursor.execute("SELECT FRANQUICIA, SO, CLIENTE_FINAL, PT_PRODUCTO, OP FROM baseModulos WHERE CLIENTE_FINAL=?", op)
+        cursor.execute("SELECT FRANQUICIA, SO, CLIENTE_FINAL, PT_PRODUCTO, OP, COUNT(idOrdenManufactura) AS TOTAL, "
+                       "SUM(CASE WHEN lecturahorno >= 1 THEN 1 ELSE 0 END) AS TERMINADOS, "
+                       "SUM(CASE WHEN (NOT lecturahorno >= 1) OR (lecturaHorno is Null) THEN 1 ELSE 0 END) AS PENDIENTES "
+                       "FROM baseModulos GROUP BY FRANQUICIA, SO, CLIENTE_FINAL, PT_PRODUCTO, OP "
+                       "HAVING   (CLIENTE_FINAL = ?)", op)
     records = cursor.fetchall()
     data = []
     columnNames = [column[0] for column in cursor.description]
@@ -224,7 +240,7 @@ def lista_CF(op):
     cursor.close()
     return data
 
-def lista_Fr(op):
+"""def lista_Fr(op):
     cursor = con.cursor()
     if op == 0:
         cursor.execute("SELECT DISTINCT FRANQUICIA FROM baseModulos")
@@ -236,14 +252,18 @@ def lista_Fr(op):
     for record in records:
         data.append(dict(zip(columnNames, record)))
     cursor.close()
-    return data
+    return data"""
 
 def lista_SO(op):
     cursor = con.cursor()
     if op == 0:
-        cursor.execute("SELECT DISTINCT SO FROM baseModulos")
+        cursor.execute("SELECT DISTINCT SO FROM baseModulos ORDER BY SO")
     else:
-        cursor.execute("SELECT FRANQUICIA, SO, CLIENTE_FINAL, PT_PRODUCTO, OP FROM baseModulos WHERE SO=?", op)
+        cursor.execute("SELECT FRANQUICIA, SO, CLIENTE_FINAL, PT_PRODUCTO, OP, COUNT(idOrdenManufactura) AS TOTAL, "
+                       "SUM(CASE WHEN lecturahorno >= 1 THEN 1 ELSE 0 END) AS TERMINADOS, "
+                       "SUM(CASE WHEN (NOT lecturahorno >= 1) OR (lecturaHorno is Null) THEN 1 ELSE 0 END) AS PENDIENTES "
+                       "FROM baseModulos GROUP BY FRANQUICIA, SO, CLIENTE_FINAL, PT_PRODUCTO, OP "
+                       "HAVING   (SO = ?)", op)
     records = cursor.fetchall()
     data = []
     columnNames = [column[0] for column in cursor.description]

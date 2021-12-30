@@ -18,6 +18,8 @@
         <a class="navbar-brand" href="/">RENO</a>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav nav-tabs">
+
+
             <li class="nav-item" onclick="myFunction(1)">
                 <a class="nav-link" href="#">########</a>
             </li>
@@ -37,11 +39,11 @@
 
 
 
-                            <label for="ops">Franquicia:</label>
+                            <label for="ops">Cliente Final:</label>
                             <select name="ops" data-live-search="true" id="ops" class="form-control">
-                            <option selected>Fr</option>
-                            {% for row in franquicias %}
-                            <option value="{{row['FRANQUICIA']}}">{{row['FRANQUICIA']}}</option>
+                            <option selected>CF</option>
+                            {% for row in clientes %}
+                            <option value="{{row['CLIENTE_FINAL']}}">{{row['CLIENTE_FINAL']}}</option>
                             {% endfor %}
                             </select>
                     <br><br>
@@ -55,13 +57,13 @@
                             </select>
                     <br><br>
 
-                            <label for="espesores">Cliente Final:</label>
+                            <!--<label for="espesores">Cliente Final:</label>
                             <select name="espesores" data-live-search="true" id="espesores" class="form-control">
                             <option selected>CF</option>
                             {% for row in clientes %}
                             <option value="{{row['CLIENTE_FINAL']}}">{{row['CLIENTE_FINAL']}}</option>
                             {% endfor %}
-                            </select>
+                            </select> -->
 
 
 
@@ -75,8 +77,8 @@
                                 <th scope="col">CLIENTE_FINAL</th>
                                 <th scope="col">PT_PRODUCTO</th>
                                 <th scope="col">OP</th>
-                                <!--<th scope="col">T</th>
-                                <th scope="col">P</th> -->
+                                <th scope="col">T</th>
+                                <th scope="col">P</th>
                             </tr>
                             </thead>
                             <tbody id="tabla" name="tabla">
@@ -95,7 +97,7 @@
 
                 function load_data(type, op) {
                     $.ajax({
-                        url: "/buscar_fr",
+                        url: "/buscar_cf",
                         method: "POST",
                         data: { type: type, op: op },
                         dataType: "json",
@@ -106,11 +108,15 @@
                                 '<td>' + data[count].SO + "</td>" +
                                 '<td>' + data[count].CLIENTE_FINAL + "</td>" +
                                 '<td>' + data[count].PT_PRODUCTO + "</td>" +
-                                '<td>' + data[count].OP + "</td></tr>";
+                                '<td>' + data[count].OP + "</td>" +
+                                '<td>' + data[count].TERMINADOS + "</td>" +
+                                '<td>' + data[count].PENDIENTES + "</td></tr>";
                             }
                             if (type == "FR") {
                                 $("#tabla").html(html);
                                 $("#tabla").selectpicker("refresh");
+                                var select = document.querySelector('colores');
+                                $("#ops").attr('selectedIndex', '-1').find("option:selected").removeAttr("selected");
                             }
                         },
                     });
@@ -139,11 +145,14 @@
                                 '<td>' + data[count].SO + "</td>" +
                                 '<td>' + data[count].CLIENTE_FINAL + "</td>" +
                                 '<td>' + data[count].PT_PRODUCTO + "</td>" +
-                                '<td>' + data[count].OP + "</td></tr>";
+                                '<td>' + data[count].OP + "</td>" +
+                                '<td>' + data[count].TERMINADOS + "</td>" +
+                                '<td>' + data[count].PENDIENTES + "</td></tr>";
                             }
                             if (type == "SO") {
                                 $("#tabla").html(html);
                                 $("#tabla").selectpicker("refresh");
+                                $("#ops").attr('selectedIndex', '-1').find("option:selected").removeAttr("selected");
                             }
                         },
                     });
@@ -155,7 +164,7 @@
                 });
             });
         </script>
-        <script>
+        <!-- <script>
               $(document).ready(function () {
                 $("#espesores").selectpicker();
 
@@ -172,7 +181,10 @@
                                 '<td>' + data[count].SO + "</td>" +
                                 '<td>' + data[count].CLIENTE_FINAL + "</td>" +
                                 '<td>' + data[count].PT_PRODUCTO + "</td>" +
-                                '<td>' + data[count].OP + "</td></tr>";
+                                '<td>' + data[count].OP + "</td></tr>"
+                                '<td>' + data[count].TOTAL + "</td>" +
+                                '<td>' + data[count].TERMINADOS + "</td>" +
+                                '<td>' + data[count].PENDIENTES + "</td>":
                             }
                             if (type == "CF") {
                                 $("#tabla").html(html);
@@ -187,8 +199,8 @@
                     load_data("CF", espesor);
                 });
             });
-        </script>
+        </script> -->
 
-        </body>
+    </body>
 
 </html>
