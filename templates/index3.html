@@ -115,8 +115,6 @@
                             if (type == "FR") {
                                 $("#tabla").html(html);
                                 $("#tabla").selectpicker("refresh");
-                                var select = document.querySelector('colores');
-                                $("#ops").attr('selectedIndex', '-1').find("option:selected").removeAttr("selected");
                             }
                         },
                     });
@@ -128,6 +126,35 @@
                 });
             });
         </script>
+            <!--    <script>
+            $(document).ready(function () {
+                $("#ops").selectpicker();
+
+                function load_data(type, op) {
+                    $.ajax({
+                        url: "/limpiar_so",
+                        method: "POST",
+                        data: { type: type, op: op },
+                        dataType: "json",
+                        success: function (data) { //alert(op)
+                            var html = "";
+                            for (var count = 0; count < data.length; count++) {
+                                html += '<option value="' + data[count].SO + '">' + data[count].SO + "</option>";
+                            }
+                            if (type == "FR") {
+                                $("#colores").html(html);
+                                $("#colores").selectpicker("refresh");
+                            }
+                        },
+                    });
+                }
+
+                $(document).on("change", "#ops", function () {
+                    var op = $("#ops").val();
+                    load_data("FR", 0);
+                });
+            });
+        </script> -->
         <script>
             $(document).ready(function () {
                 $("#colores").selectpicker();
@@ -152,7 +179,6 @@
                             if (type == "SO") {
                                 $("#tabla").html(html);
                                 $("#tabla").selectpicker("refresh");
-                                $("#ops").attr('selectedIndex', '-1').find("option:selected").removeAttr("selected");
                             }
                         },
                     });
@@ -201,6 +227,6 @@
             });
         </script> -->
 
-    </body>
+        </body>
 
 </html>

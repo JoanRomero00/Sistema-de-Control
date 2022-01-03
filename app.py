@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import pyodbc
+import os
+import pandas
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = './Archivos'
 
 # pyodbc
 con = pyodbc.connect(
@@ -52,6 +56,20 @@ def index2(maquina):
 @app.route('/index3/<string:maquina>')
 def index3(maquina):
     return render_template("index3.html", maquina=maquina, sos=lista_SO(0), clientes=lista_CF(0))
+
+
+@app.route('/index4')
+def index4():
+    return render_template("index4.html")
+
+
+@app.route('/subir_archivo', methods=['POST'])
+def subir_archivo():
+    if request.method == 'POST':
+        archivo = request.files['archivo']
+        filename = secure_filename(archivo.filename)
+        archivo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return redirect(url_for('index4'))
 
 
 @app.route('/escanear_codigo/<string:maq>/<string:templete>', methods=['POST'])
@@ -153,6 +171,12 @@ def buscar_cf():
         op = request.form['op']
         print(op)
         return jsonify(lista_CF(op))
+
+
+@app.route("/limpiar_so", methods=["POST", "GET"])
+def limpiar_cf():
+    if request.method == 'POST':
+        return jsonify(lista_SO(0))
 
 
 @app.route("/buscar_so", methods=["POST", "GET"])
