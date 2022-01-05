@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import pyodbc
 import os
-import pandas
+import logic_subidaModulos
+import logic_subidaPiezas
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = './Archivos'
+app.config['UPLOAD_FOLDER'] = './'
 
 # pyodbc
 con = pyodbc.connect(
@@ -60,16 +61,57 @@ def index3(maquina):
 
 @app.route('/index4')
 def index4():
-    return render_template("index4.html")
+    list = []
+    for o in lista_op2():
+        list.append(o['OP'])
+    return render_template("index4.html", ops=list)
+
+
+@app.route('/baja_archivo', methods=['POST'])
+def baja_archivo():
+    if request.method == 'POST':
+        tipo = request.form['tipo']
+        op = request.form['op']
+        if tipo == 'baseModulos':
+            elimar_Modulos(op)
+            flash('DatosMODULOS borrados correctamente')
+            return redirect(url_for('index4'))
+        elif tipo == 'basePiezas':
+            elimar_Piezas(op)
+            flash('DatosPIEZAS borrados correctamente')
+            return redirect(url_for('index4'))
+        elif tipo == 'Ambas':
+            elimar_Modulos(op)
+            elimar_Piezas(op)
+            flash('DatosPIEZAS y DatosMODULOS borrados correctamente')
+            return redirect(url_for('index4'))
 
 
 @app.route('/subir_archivo', methods=['POST'])
 def subir_archivo():
     if request.method == 'POST':
-        archivo = request.files['archivo']
-        filename = secure_filename(archivo.filename)
-        archivo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return redirect(url_for('index4'))
+        try:
+            tipo = request.form['tipo_subida']
+            archivo = request.files['archivo']
+            filename = secure_filename(archivo.filename)
+            archivo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            if tipo == 'baseModulos':
+                logic_subidaModulos.cargar_archivo(archivo.filename)
+                flash('DatosMODULOS subidos correctamente')
+                return redirect(url_for('index4'))
+            elif tipo == 'basePiezas':
+                logic_subidaPiezas.cargar_archivo(archivo.filename)
+                flash('DatosPIEZAS subidos correctamente')
+                return redirect(url_for('index4'))
+        except PermissionError:
+            flash("Error: No se a cargado ningun archivo", 'danger')
+            return redirect(url_for('index4'))
+        except KeyError:
+            flash("Error: Archivo equivocado", 'danger')
+            return redirect(url_for('index4'))
+
+
+
 
 
 @app.route('/escanear_codigo/<string:maq>/<string:templete>', methods=['POST'])
@@ -117,11 +159,6 @@ def lectura_masiva(maq):
             cursor.close()
         flash("Lectura masiva realizada con exito. \n OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor)
         return redirect(url_for('index1', maquina=maq))
-
-
-@app.errorhandler(500)
-def access_error(error):
-    return render_template('error.html'), 500
 
 
 @app.route("/ops", methods=["POST", "GET"])
@@ -295,3 +332,27 @@ def lista_SO(op):
         data.append(dict(zip(columnNames, record)))
     cursor.close()
     return data
+
+def elimar_Modulos(op):
+    cursor = con.cursor()
+    cursor.execute("DELETE FROM baseModulos WHERE OP = ?", op)
+    cursor.commit()
+    cursor.close()
+
+def elimar_Piezas(op):
+    cursor = con.cursor()
+    cursor.execute("DELETE FROM basePiezas WHERE OP = ?", op)
+    cursor.commit()
+    cursor.close()
+
+
+def lista_op2():
+    cursor = con.cursor()
+    cursor.execute('(SELECT DISTINCT OP FROM basePiezas) UNION (SELECT DISTINCT OP FROM baseModulos) ORDER BY OP')
+    records = cursor.fetchall()
+    OutputArray = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in records:
+        OutputArray.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return OutputArray

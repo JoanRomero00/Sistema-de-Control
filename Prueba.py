@@ -1,6 +1,7 @@
 import pyodbc
 import pandas
 import datetime
+import xlrd
 con = pyodbc.connect(
     "Driver={SQL Server Native Client 11.0};"
     "Server=ANDRESPC;"
@@ -152,76 +153,8 @@ def lista_CF(op):
     cursor.close()
     return data
 
-def rellenar_fila(indice):
-    tabla.iloc[i]['ORDEN_MANUFACTURA']
-
 #print(lista_CF('Branson'))
 
-tabla = pandas.read_excel('baseModulos.xlsx')
-del(tabla['Unnamed: 28'])
-del(tabla['Unnamed: 29'])
-del(tabla['Unnamed: 30'])
-del(tabla['Unnamed: 31'])
-
-tabla.insert(0, "idModulo", None, allow_duplicates=False)
-tabla.insert(1, "idOrdenManufactura", None, allow_duplicates=False)
-tabla.insert(2, "repeticion", None, allow_duplicates=False)
-
-
-tabla.insert(31, "lecturaHorno", None, allow_duplicates=False)
-tabla.insert(32, "fechalecturaHorno", None, allow_duplicates=False)
-tabla.insert(33, "fechaCarga", None, allow_duplicates=False)
-
-#tabla.to_excel('example.xlsx')
-#print(tabla)
-
-ids = []
-ids_OM = []
-repeticiones = []
-resto_info = []
-tabla_final = pandas.DataFrame()
-id = 280187
-for i in range(0, len(tabla.index)):
-    cant = tabla.iloc[i]['PT_CANTIDAD']
-    if cant == 1:
-        complete = tabla.iloc[i]['ORDEN_MANUFACTURA'] + '/0'
-        id = id + 1
-        resto_info = {'idModulo': id, 'idOrdenManufactura': complete, 'repeticion': 0,
-                      'ORDEN_MANUFACTURA': tabla.iloc[i]['ORDEN_MANUFACTURA'],
-                      'SO': tabla.iloc[i]['SO'],
-                      'FECHA_CONFIRMACION': tabla.iloc[i]['FECHA_CONFIRMACION'],
-                      'FECHA_ENTREGA': tabla.iloc[i]['FECHA_ENTREGA'],
-                      'PT_PRODUCTO': tabla.iloc[i]['PT_PRODUCTO'],
-                      'lecturaHorno': None, 'fechaLecturaHorno': None,
-                      "fechaCarga": datetime.datetime.now()
-                      }
-        tabla_final = tabla_final.append(resto_info, ignore_index=True)
-    else:
-        for j in range(0,cant):
-            complete = tabla.iloc[i]['ORDEN_MANUFACTURA'] + '/' + str(j)
-            id = id + 1
-            resto_info = {'idModulo': id, 'idOrdenManufactura': complete, 'repeticion': j,
-                          'ORDEN_MANUFACTURA': tabla.iloc[i]['ORDEN_MANUFACTURA'],
-                          'SO': tabla.iloc[i]['SO'],
-                          'FECHA_CONFIRMACION': tabla.iloc[i]['FECHA_CONFIRMACION'],
-                          'FECHA_ENTREGA': tabla.iloc[i]['FECHA_ENTREGA'],
-                          'PT_PRODUCTO': tabla.iloc[i]['PT_PRODUCTO'],
-                          'lecturaHorno': None, 'fechaLecturaHorno': None,
-                          "fechaCarga": datetime.datetime.now()
-                          }
-            tabla_final = tabla_final.append(resto_info, ignore_index=True)
-
-
-
-
-
-#tabla_final['idModulo'] = ids
-#tabla_final['idOrdenManufactura'] = ids_OM
-#tabla_final['repeticion'] = repeticiones
-
-#tabla_final.insert(8, "lecturaHorno", None, allow_duplicates=False)
-#tabla_final.insert(9, "fechalecturaHorno", None, allow_duplicates=False)
-#tabla_final.insert(10, "fechaCarga", datetime.datetime.now(), allow_duplicates=False)
-#print(tabla.iloc[2]['PT_CANTIDAD'])
-print(tabla_final)
-tabla_final.to_excel('example.xlsx')
+fecha = datetime.datetime.now()
+print(fecha.strftime("%c"))
+print(fecha.strftime("%x") + ' ' + fecha.strftime("%X"))

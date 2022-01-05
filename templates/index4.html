@@ -7,7 +7,6 @@
 
     <!-- Bootstrap CSS -->
      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
      <title>Sistema de control</title>
@@ -19,7 +18,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav nav-tabs">
             <li class="nav-item" onclick="myFunction(1)">
-                <a class="nav-link" href="#">Dar alta</a>
+                <a class="nav-link" href="#">Dar Alta</a>
             </li>
             <!--<li class="nav-item" onclick="myFunction(2)">
                 <a class="nav-link" href="#">Etiqueta</a>
@@ -38,10 +37,61 @@
 
             <div class="col-md-12 order-md-1">
                 <div id="control">
-                    {% with messages = get_flashed_messages()  %}
+                    <h2 class="mb-3 text-center">ALTAS</h2>
+                    <div>
+                      {% with messages = get_flashed_messages(with_categories=true) %}
+                          {% if messages %}
+                            {% for category, message in messages %}
+                                {% if category == 'message' %}
+                                  <div class="alert alert-success" role="alert">
+                                {% else %}
+                                  <div class="alert alert-{{ category }}" role="alert">
+                                {% endif %}
+                                  <strong>{{ message }}</strong>
+                                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                            {% endfor %}
+                          {% endif %}
+                      {% endwith %}
+                    </div>
+                   <!-- {% with messages = get_flashed_messages() %}
                     {% if messages %}
                     {% for message in messages %}
-                      <div class="alert alert-danger" role="alert">
+                      <div class="alert alert-success" role="alert">
+                          <strong>{{ message }}</strong>
+                          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                          </button>
+                      </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %} -->
+
+                    <form action={{url_for('subir_archivo')}} method="POST" enctype="multipart/form-data">
+                     <div class="form-group">
+                     <label> Seleccione tipo :</label>
+                     <select name="tipo_subida">
+                                <option value="baseModulos">Modulos</option>
+                                <option value="basePiezas">Piezas</option>
+                     </select>
+                     </div>
+                     <div class="form-group">
+                     <input type="file" name="archivo">
+                     </div>
+                     <button type="submit" class="btn btn-success">Enviar</button>
+
+                    </form>
+            <br><br>
+                </div>
+
+                <div id="baja_op" style="display:none;">
+                <h2 class="mb-3 text-center">BAJAS</h2>
+                {% with messages = get_flashed_messages()  %}
+                    {% if messages %}
+                    {% for message in messages %}
+                      <div class="alert alert-success" role="alert">
                           <strong>{{ message }}</strong>
                           <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
@@ -50,27 +100,30 @@
                     {% endfor %}
                     {% endif %}
                     {% endwith %}
-                        <!-- <form action={{url_for('subir_archivo')}} method="POST"> -->
-                            <!-- <div class="form-group">
-                            <select>
+
+                    <form action={{url_for('baja_archivo')}} method="POST" enctype="multipart/form-data">
+                     <div class="form-group">
+                     <label for="tipo"> Seleccione tipo :</label>
+                     <select name="tipo" id="tipo">
                                 <option value="baseModulos">Modulos</option>
                                 <option value="basePiezas">Piezas</option>
+                                <option value="Ambas">Ambas</option>
+                     </select>
+                     </div>
+                     <div class="form-group">
+                            <label for="op">Seleccione OP:</label>
+                            <select name="op" id="op" data-live-search="true" class="form-control">
+                            <option selected>OP</option>
+                            {% for row in ops %}
+                            <option value="{{row}}">{{row}}</option>
+                            {% endfor %}
                             </select>
-                            </div> <br> -->
-                            <!-- <div class="form-group">
-                                <label for="archivo">Adjuntar archivo</label>
-                                <input type="file" accept=".xlsx" id="archivo" name="archivo">
-                            </div> <br>
-                            <div> <button type="submit" class="btn btn-success">Subir</button> </div>
-                        </form> -->
-                    <form action={{url_for('subir_archivo')}} method="POST" enctype="multipart/form-data">
-                     <input type="file" name="archivo">
-                     <input type="submit">
+                     </div>
+                     <button type="submit" class="btn btn-success">Enviar</button>
+
                     </form>
             <br><br>
-                </div>
 
-                <div id="baja_op" style="display:none;">
                 </div>
             </div>
         </div>
