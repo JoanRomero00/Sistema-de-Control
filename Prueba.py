@@ -158,3 +158,22 @@ def lista_CF(op):
 fecha = datetime.datetime.now()
 print(fecha.strftime("%c"))
 print(fecha.strftime("%x") + ' ' + fecha.strftime("%X"))
+
+a = 'CAJ000000006268A'
+b = '\0'
+a2 = b[:1] + a[:3]
+print(a2)
+
+def lista_op2():
+    cursor = con.cursor()
+    cursor.execute('SELECT * FROM ProduccionDiariaModulosTablero')
+    records = cursor.fetchall()
+    OutputArray = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in records:
+        OutputArray.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return OutputArray
+
+print(lista_op2())
+

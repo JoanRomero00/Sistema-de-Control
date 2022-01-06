@@ -1,0 +1,32 @@
+<body>
+<iframe id="inlineFrameExample"
+    title="Inline Frame Example"
+    height="100%"
+    width="84%"
+    style="float:right;"
+    src="/buscar_plano/{{ plano }}">
+</iframe>
+
+<div class="text-center" width="22%" style="float:left;">
+    <label><strong>Ingrese codigo: </strong> </label>
+    <form action={{url_for('leer_plano')}} method="POST">
+        <input type="text" name="plano" id="plano" autofocus>
+    </form>
+    <br>
+    <h2 class="text-center">MULTIFAMILIAR</h2>
+    <br>
+    <progress id="progreso_Multi" value="120" max="150"></progress>
+    <br>
+    <h2 id="multifamiliar" for="progreso_Multi"> 120 de 150</h2>
+    <br>
+    <br>
+    <h2>UNIFAMILIAR</h2>
+    <br>
+    <progress id="progreso_Uni" value="120" max="150"></progress>
+    <br>
+    <h2 id="unifamiliar" for="progreso_Uni"> 120 de 150</h2>
+    <br>
+    <br>
+    <h1 class="text-center" style="color:red;font-size:60px;" id="total"> 240</h1>
+</div>
+</body>

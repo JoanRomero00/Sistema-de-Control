@@ -36,7 +36,7 @@
             <div class="row">
 
             <div class="col-md-12 order-md-1">
-                <div id="control">
+                <div id="control" style={{ display1 }}>
                     <h2 class="mb-3 text-center">ALTAS</h2>
                     <div>
                       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -86,7 +86,7 @@
             <br><br>
                 </div>
 
-                <div id="baja_op" style="display:none;">
+                <div id="baja_op" style={{ display2 }}>
                 <h2 class="mb-3 text-center">BAJAS</h2>
                 {% with messages = get_flashed_messages()  %}
                     {% if messages %}

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
 import pyodbc
 import os
 import logic_subidaModulos
@@ -64,7 +64,28 @@ def index4():
     list = []
     for o in lista_op2():
         list.append(o['OP'])
-    return render_template("index4.html", ops=list)
+    return render_template("index4.html", ops=list, display2="display:none;")
+
+
+@app.route('/planos/<string:plano>')
+def planos(plano):
+    return render_template("planos.html", plano=plano, produccion=produccion_diaria())
+
+
+@app.route('/buscar_plano/<string:plano>')
+def buscar_plano(plano):
+    if len(plano) > 12:
+        aux = "/" + plano[:3]
+        return send_from_directory('E:\COMPARTIDOS\Ing de Producto\Productos - VISTAS Y PLANOS\Desenhos' + aux, plano + '.pdf')
+    else:
+        return send_from_directory('E:\COMPARTIDOS\Ing de Producto\Productos - VISTAS Y PLANOS\Desenhos', plano + '.pdf')
+
+@app.route('/leer_plano', methods=['POST'])
+def leer_plano():
+    if request.method == 'POST':
+        plano = request.form['plano']
+        return redirect(url_for('planos', plano=plano))
+
 
 
 @app.route('/baja_archivo', methods=['POST'])
@@ -349,6 +370,17 @@ def elimar_Piezas(op):
 def lista_op2():
     cursor = con.cursor()
     cursor.execute('(SELECT DISTINCT OP FROM basePiezas) UNION (SELECT DISTINCT OP FROM baseModulos) ORDER BY OP')
+    records = cursor.fetchall()
+    OutputArray = []
+    columnNames = [column[0] for column in cursor.description]
+    for record in records:
+        OutputArray.append(dict(zip(columnNames, record)))
+    cursor.close()
+    return OutputArray
+
+def produccion_diaria():
+    cursor = con.cursor()
+    cursor.execute('SELECT * FROM ProduccionDiariaModulosTablero')
     records = cursor.fetchall()
     OutputArray = []
     columnNames = [column[0] for column in cursor.description]
