@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
 import pyodbc
 import os
+import datetime
 import logic_subidaModulos
 import logic_subidaPiezas
+from os import remove
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -27,28 +29,30 @@ def index():
 
 @app.route('/index1/<string:maquina>')
 def index1(maquina):
-    complete = 'SELECT TOP 5 idPieza, PIEZA_DESCRIPCION FROM basePiezas ORDER BY ' \
-               'fechaLectura' + maquina + ' DESC'
+    hoy = fecha()[:10]
+    complete = "SELECT TOP 8 idPieza, PIEZA_DESCRIPCION FROM basePiezas " \
+              "where CONVERT (DATE, fechaLectura" + maquina + ") = ? ORDER BY fechaLectura" + maquina + " DESC"
     cursor = con.cursor()
-    cursor.execute(complete)
+    cursor.execute(complete, hoy)
     data = cursor.fetchall()
     cursor.close()
     list = []
-    for o in lista_op():
+    for o in lista_op(maquina):
         list.append(o['OP'])
     return render_template("index1.html", maquina=maquina, piezas=data, ops=list)
 
 
 @app.route('/index2/<string:maquina>')
 def index2(maquina):
+    hoy = fecha()[:10]
     if maquina == "HORNO":
-        complete = 'SELECT TOP 5 idOrdenManufactura, PT_PRODUCTO FROM baseModulos ORDER BY ' \
-                   'fechaLecturaHorno DESC'
+        complete = 'SELECT TOP 8 idOrdenManufactura, PT_PRODUCTO FROM baseModulos ' \
+                   'where CONVERT (DATE, fechaLecturaHORNO) = ? ORDER BY fechaLecturaHorno DESC'
     else:
-        complete = 'SELECT TOP 5 idPieza, PIEZA_DESCRIPCION FROM basePiezas ORDER BY ' \
-                'fechaLectura' + maquina + ' DESC'
+        complete = "SELECT TOP 8 idPieza, PIEZA_DESCRIPCION FROM basePiezas " \
+                   "where CONVERT (DATE, fechaLectura" + maquina + ") = ? ORDER BY fechaLectura" + maquina + " DESC"
     cursor = con.cursor()
-    cursor.execute(complete)
+    cursor.execute(complete, hoy)
     data = cursor.fetchall()
     cursor.close()
     return render_template("index2.html", maquina=maquina, piezas=data)
@@ -74,11 +78,23 @@ def planos(plano):
 
 @app.route('/buscar_plano/<string:plano>')
 def buscar_plano(plano):
+    if plano == "0":
+        return "BUSCAR PLANO"
     if len(plano) > 12:
         aux = "/" + plano[:3]
-        return send_from_directory('E:\COMPARTIDOS\Ing de Producto\Productos - VISTAS Y PLANOS\Desenhos' + aux, plano + '.pdf')
+        path = 'E:\COMPARTIDOS\Ing de Producto\Productos - VISTAS Y PLANOS\Desenhos' + aux + '/' + plano + '.pdf'
+        if os.path.isfile(path):
+            return send_from_directory('E:\COMPARTIDOS\Ing de Producto\Productos - VISTAS Y PLANOS\Desenhos' + aux, plano + '.pdf')
+        else:
+            return "PLANO NO ENCONTRADO"
     else:
-        return send_from_directory('E:\COMPARTIDOS\Ing de Producto\Productos - VISTAS Y PLANOS\Desenhos', plano + '.pdf')
+        path = 'E:\COMPARTIDOS\Ing de Producto\Productos - VISTAS Y PLANOS\Desenhos' + '/' + plano + '.pdf'
+        if os.path.isfile(path):
+            return send_from_directory('E:\COMPARTIDOS\Ing de Producto\Productos - VISTAS Y PLANOS\Desenhos', plano + '.pdf')
+        else:
+            return "PLANO NO ENCONTRADO"
+
+
 
 @app.route('/leer_plano', methods=['POST'])
 def leer_plano():
@@ -128,6 +144,7 @@ def subir_archivo():
             flash("Error: No se a cargado ningun archivo", 'danger')
             return redirect(url_for('index4'))
         except KeyError:
+            #FALTA REMOVE
             flash("Error: Archivo equivocado", 'danger')
             return redirect(url_for('index4'))
 
@@ -139,46 +156,63 @@ def subir_archivo():
 def escanear_codigo(maq, templete):
     if request.method == 'POST':
         codigo = request.form['cod_escaneado']
-        if verificacion(codigo, maq) == 1:
-            flash('El codigo ' + codigo + ' ya fue escaneado')
-            return redirect(url_for(templete, maquina=maq))
-        elif verificacion(codigo, maq) == None:
-            flash('Codigo ingresado incorrecto. Intente de nuevo')
-            return redirect(url_for(templete, maquina=maq))
-        else:
-            if maq == "HORNO":
-                complete = 'UPDATE dbo.baseModulos SET fechaLecturaHorno = getdate(), lecturaHorno = 1 WHERE idOrdenManufactura = ?'
+        try:
+            if verificacion(codigo, maq) == 1:
+                flash('El codigo ' + codigo + ' ya fue escaneado')
+                return redirect(url_for(templete, maquina=maq))
+            elif verificacion(codigo, maq) == None:
+                flash('El codigo ingresado no existe.')
+                return redirect(url_for(templete, maquina=maq))
             else:
-                complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate(), lectura' + maq + ' = 1 WHERE idPieza = ?'
-            cursor = con.cursor()
-            cursor.execute(complete, codigo)
-            cursor.commit()
-            cursor.close()
+                if maq == "HORNO":
+                    complete = 'UPDATE dbo.baseModulos SET fechaLecturaHorno = ?, lecturaHorno = 1 WHERE idOrdenManufactura = ?'
+                else:
+                    complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = ?, lectura' + maq + ' = 1 WHERE idPieza = ?'
+                cursor = con.cursor()
+                cursor.execute(complete, fecha(),codigo)
+                cursor.commit()
+                cursor.close()
+                return redirect(url_for(templete, maquina=maq))
+        except pyodbc.DataError:
+            flash("Error: el codigo ingresado es incorrecto. Intente nuevamente")
             return redirect(url_for(templete, maquina=maq))
 
 
 @app.route('/lectura_masiva/<string:maq>', methods=['POST'])
 def lectura_masiva(maq):
-    if request.method == 'POST':
-        op = request.form['ops']
-        color = request.form['colores']
-        espesor = request.form['espesores']
-        cursor = con.cursor()
-        cursor.execute("SELECT idPieza FROM basePiezas WHERE OP=? "
-                       "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=?", op, color, espesor)
-        records = cursor.fetchall()
-        ids = []
-        columnNames = [column[0] for column in cursor.description]
-        for record in records:
-            ids.append(dict(zip(columnNames, record)))
-        cursor.close()
-        for id in ids:
-            complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate(), lectura' + maq + ' = 1 WHERE idPieza = ?'
+    try:
+        if request.method == 'POST':
+            op = request.form['ops']
+            color = request.form['colores']
+            espesor = request.form['espesores']
+            if color == 'Color':
+                flash("Error: Por favor ingrese todos los campos")
+                return redirect(url_for('index1', maquina=maq))
+
             cursor = con.cursor()
-            cursor.execute(complete, id['idPieza'])
-            cursor.commit()
+            complete = "SELECT idPieza FROM basePiezas WHERE OP=? " \
+                       "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=? AND lectura" + maq + " = 0"
+            cursor.execute(complete, op, color, espesor)
+            records = cursor.fetchall()
+            if records == []:
+                flash("Esta lectura masiva ya se a realizado. OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor)
+                return redirect(url_for('index1', maquina=maq))
+
+            ids = []
+            columnNames = [column[0] for column in cursor.description]
+            for record in records:
+                ids.append(dict(zip(columnNames, record)))
             cursor.close()
-        flash("Lectura masiva realizada con exito. \n OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor)
+            for id in ids:
+                complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate(), lectura' + maq + ' = 1 WHERE idPieza = ?'
+                cursor = con.cursor()
+                cursor.execute(complete, id['idPieza'])
+                cursor.commit()
+                cursor.close()
+            flash("Lectura masiva realizada con exito. \n OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor)
+            return redirect(url_for('index1', maquina=maq))
+    except pyodbc.DataError:
+        flash("Error: Por favor ingrese todos los campos")
         return redirect(url_for('index1', maquina=maq))
 
 
@@ -268,9 +302,9 @@ def verificacion(id, maq):
     return data
 
 
-def lista_op():
+def lista_op(maquina):
     cursor = con.cursor()
-    cursor.execute('SELECT DISTINCT OP FROM basePiezas ORDER BY OP')
+    cursor.execute('SELECT DISTINCT OP FROM basePiezas WHERE lectura' + maquina + ' = 0 ORDER BY OP')
     records = cursor.fetchall()
     OutputArray = []
     columnNames = [column[0] for column in cursor.description]
@@ -388,3 +422,16 @@ def produccion_diaria():
         OutputArray.append(dict(zip(columnNames, record)))
     cursor.close()
     return OutputArray
+
+
+def fecha():
+    today = datetime.datetime.now()
+    fecha = today.strftime("%Y-%m-%d %H:%M:%S")
+    return fecha
+
+def comparar_fecha(fecha):
+    if fecha == fecha():
+        return True
+    else:
+        return False
+

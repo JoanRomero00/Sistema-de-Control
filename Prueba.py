@@ -1,7 +1,9 @@
 import pyodbc
 import pandas
 import datetime
+import os
 import xlrd
+from flask import send_from_directory
 con = pyodbc.connect(
     "Driver={SQL Server Native Client 11.0};"
     "Server=ANDRESPC;"
@@ -176,4 +178,36 @@ def lista_op2():
     return OutputArray
 
 print(lista_op2())
+path = 'E:\COMPARTIDOS\Ing de Producto\Productos - VISTAS Y PLANOS\Desenhos/KPI.pdf'
 
+# Check whether the
+# specified path is
+# an existing file
+isFile = os.path.isfile(path)
+print(isFile)
+
+
+today = datetime.datetime.now()
+fecha = today.strftime("%x") + ' ' + today.strftime("%X")
+print(today.strftime("%c"))
+print(fecha)
+print(type(fecha))
+
+print(fecha[:8])
+
+if fecha[:8] == '01/07/22':
+    print("Igual")
+
+def fecha():
+    today = datetime.datetime.now()
+    fecha = today.strftime("%Y-%m-%d %H:%M:%S")
+    return fecha
+
+def comparar_fecha(fecha):
+    if fecha == fecha():
+        return True
+    else:
+        return False
+
+
+print(fecha())
