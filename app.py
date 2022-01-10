@@ -27,8 +27,8 @@ def index():
     return render_template("index.html")
 
 
-@app.route('/index1/<string:maquina>')
-def index1(maquina):
+@app.route('/index1/<string:maquina>/<string:ventana>')
+def index1(maquina, ventana):
     hoy = fecha()[:10]
     complete = "SELECT TOP 8 idPieza, PIEZA_DESCRIPCION FROM basePiezas " \
               "where CONVERT (DATE, fechaLectura" + maquina + ") = ? ORDER BY fechaLectura" + maquina + " DESC"
@@ -39,7 +39,16 @@ def index1(maquina):
     list = []
     for o in lista_op(maquina):
         list.append(o['OP'])
-    return render_template("index1.html", maquina=maquina, piezas=data, ops=list)
+    if ventana == "1":
+        display1=""
+        display2="display:None;"
+        return render_template("index1.html", maquina=maquina, display1=display1, display2=display2, piezas=data,
+                               ops=list)
+    elif ventana == "2":
+        display1="display:None;"
+        display2=""
+        return render_template("index1.html", maquina=maquina, display1=display1, display2=display2, piezas=data,
+                               ops=list)
 
 
 @app.route('/index2/<string:maquina>')
@@ -63,12 +72,19 @@ def index3(maquina):
     return render_template("index3.html", maquina=maquina, sos=lista_SO(0), clientes=lista_CF(0))
 
 
-@app.route('/index4')
-def index4():
+@app.route('/index4/<string:ventana>')
+def index4(ventana):
     list = []
     for o in lista_op2():
         list.append(o['OP'])
-    return render_template("index4.html", ops=list, display2="display:none;")
+    if ventana == "1":
+        display1 = ""
+        display2 = "display:none;"
+        return render_template("index4.html", ops=list, display1=display1, display2=display2)
+    elif ventana == "2":
+        display1 = "display:none;"
+        display2 = ""
+        return render_template("index4.html", ops=list, display1=display1, display2=display2)
 
 
 @app.route('/planos/<string:plano>')
@@ -112,16 +128,16 @@ def baja_archivo():
         if tipo == 'baseModulos':
             elimar_Modulos(op)
             flash('DatosMODULOS borrados correctamente')
-            return redirect(url_for('index4'))
+            return redirect(url_for('index4', ventana=2))
         elif tipo == 'basePiezas':
             elimar_Piezas(op)
             flash('DatosPIEZAS borrados correctamente')
-            return redirect(url_for('index4'))
+            return redirect(url_for('index4', ventana=2))
         elif tipo == 'Ambas':
             elimar_Modulos(op)
             elimar_Piezas(op)
             flash('DatosPIEZAS y DatosMODULOS borrados correctamente')
-            return redirect(url_for('index4'))
+            return redirect(url_for('index4', ventana=2))
 
 
 @app.route('/subir_archivo', methods=['POST'])
@@ -135,18 +151,19 @@ def subir_archivo():
             if tipo == 'baseModulos':
                 logic_subidaModulos.cargar_archivo(archivo.filename)
                 flash('DatosMODULOS subidos correctamente')
-                return redirect(url_for('index4'))
+                return redirect(url_for('index4', ventana=1))
             elif tipo == 'basePiezas':
                 logic_subidaPiezas.cargar_archivo(archivo.filename)
                 flash('DatosPIEZAS subidos correctamente')
-                return redirect(url_for('index4'))
+                return redirect(url_for('index4', ventana=1))
         except PermissionError:
             flash("Error: No se a cargado ningun archivo", 'danger')
-            return redirect(url_for('index4'))
+            return redirect(url_for('index4', ventana=1))
         except KeyError:
-            #FALTA REMOVE
+            archivo = request.files['archivo']
+            remove(archivo.filename)
             flash("Error: Archivo equivocado", 'danger')
-            return redirect(url_for('index4'))
+            return redirect(url_for('index4', ventana=1))
 
 
 
@@ -159,9 +176,13 @@ def escanear_codigo(maq, templete):
         try:
             if verificacion(codigo, maq) == 1:
                 flash('El codigo ' + codigo + ' ya fue escaneado')
+                if templete == "index1":
+                    return redirect(url_for(templete, maquina=maq, ventana="1"))
                 return redirect(url_for(templete, maquina=maq))
             elif verificacion(codigo, maq) == None:
                 flash('El codigo ingresado no existe.')
+                if templete == "index1":
+                    return redirect(url_for(templete, maquina=maq, ventana="1"))
                 return redirect(url_for(templete, maquina=maq))
             else:
                 if maq == "HORNO":
@@ -172,9 +193,13 @@ def escanear_codigo(maq, templete):
                 cursor.execute(complete, fecha(),codigo)
                 cursor.commit()
                 cursor.close()
+                if templete == "index1":
+                    return redirect(url_for(templete, maquina=maq, ventana="1"))
                 return redirect(url_for(templete, maquina=maq))
         except pyodbc.DataError:
             flash("Error: el codigo ingresado es incorrecto. Intente nuevamente")
+            if templete == "index1":
+                return redirect(url_for(templete, maquina=maq, ventana="1"))
             return redirect(url_for(templete, maquina=maq))
 
 
@@ -186,8 +211,8 @@ def lectura_masiva(maq):
             color = request.form['colores']
             espesor = request.form['espesores']
             if color == 'Color':
-                flash("Error: Por favor ingrese todos los campos")
-                return redirect(url_for('index1', maquina=maq))
+                flash("Error: Por favor ingrese todos los campos", 'danger')
+                return redirect(url_for('index1', maquina=maq, ventana=2))
 
             cursor = con.cursor()
             complete = "SELECT idPieza FROM basePiezas WHERE OP=? " \
@@ -195,8 +220,8 @@ def lectura_masiva(maq):
             cursor.execute(complete, op, color, espesor)
             records = cursor.fetchall()
             if records == []:
-                flash("Esta lectura masiva ya se a realizado. OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor)
-                return redirect(url_for('index1', maquina=maq))
+                flash("Esta lectura masiva ya se a realizado. OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor, 'warning')
+                return redirect(url_for('index1', maquina=maq, ventana=2))
 
             ids = []
             columnNames = [column[0] for column in cursor.description]
@@ -210,10 +235,10 @@ def lectura_masiva(maq):
                 cursor.commit()
                 cursor.close()
             flash("Lectura masiva realizada con exito. \n OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor)
-            return redirect(url_for('index1', maquina=maq))
+            return redirect(url_for('index1', maquina=maq, ventana=2))
     except pyodbc.DataError:
-        flash("Error: Por favor ingrese todos los campos")
-        return redirect(url_for('index1', maquina=maq))
+        flash("Error: Por favor ingrese todos los campos", 'danger')
+        return redirect(url_for('index1', maquina=maq, ventana=2))
 
 
 @app.route("/ops", methods=["POST", "GET"])

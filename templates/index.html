@@ -21,10 +21,10 @@
                 Corte
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href={{ url_for('index1' , maquina="GBN1", display1="", display2="display:none;") }}>GBN1</a>
-                <a class="dropdown-item" href={{ url_for('index1' , maquina="SLC") }}>SLC</a>
-                <a class="dropdown-item" href={{ url_for('index1' , maquina="NST") }}>NST</a>
-                <a class="dropdown-item" href={{ url_for('index1' , maquina="GBM") }}>GBM</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="GBN1", ventana=1) }}>GBN1</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="SLC", ventana=1) }}>SLC</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="NST", ventana=1) }}>NST</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="GBM", ventana=1) }}>GBM</a>
               </div>
             </li>
             <li class="nav-item dropdown">
@@ -32,7 +32,7 @@
                 Pegado
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href={{ url_for('index1' , maquina="STF") }}>STF</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="STF", ventana=1) }}>STF</a>
                 <a class="dropdown-item" href={{ url_for('index2' , maquina="MRT1") }}>MRT1</a>
                 <a class="dropdown-item" href={{ url_for('index2' , maquina="MRT2") }}>MRT2</a>
                 <a class="dropdown-item" href={{ url_for('index2' , maquina="MRT3") }}>MRT3</a>
@@ -50,7 +50,7 @@
                 <a class="dropdown-item" href={{ url_for('index2' , maquina="FTAL1") }}>FTAL1</a>
                 <a class="dropdown-item" href={{ url_for('index2' , maquina="KBT1") }}>KBT1</a>
                 <a class="dropdown-item" href={{ url_for('index2' , maquina="KBT2") }}>KBT2</a>
-                <a class="dropdown-item" href={{ url_for('index1' , maquina="VTP1") }}>VTP1</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="VTP1", ventana=1) }}>VTP1</a>
               </div>
             </li>
             <li class="nav-item dropdown">
@@ -58,9 +58,9 @@
                 Frentes
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href={{ url_for('index1' , maquina="LEA") }}>LEA</a>
-                <a class="dropdown-item" href={{ url_for('index1' , maquina="PRS") }}>PRS</a>
-                <a class="dropdown-item" href={{ url_for('index1' , maquina="ALU") }}>ALU</a>
+                <a class="dropdown-item" href={{ url_for('index1' , maquina="LEA", ventana=1) }}>LEA</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="PRS") }}>PRS</a>
+                <a class="dropdown-item" href={{ url_for('index2' , maquina="ALU") }}>ALU</a>
               </div>
             </li>
             <li class="nav-item dropdown">
