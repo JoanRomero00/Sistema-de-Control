@@ -211,3 +211,16 @@ def comparar_fecha(fecha):
 
 
 print(fecha())
+
+cursor = con.cursor()
+cursor.execute("SELECT MAX(idModulo) FROM baseModulos")
+id = cursor.fetchone()
+cursor.close()
+print(id[0])
+
+cursor = con.cursor()
+cursor.execute("SELECT top 1 idPieza FROM basePiezas "
+                "WHERE idPieza < 4231001 ORDER BY idPieza DESC")
+id = cursor.fetchone()
+cursor.close()
+print(id[0])

@@ -125,10 +125,29 @@
                             </select>
                         </div>
                     <div><label id="cantidad" name="cantidad"></label></div>
-                    <div><button type="submit" class="btn btn-success">Dar de baja piezas</button></div>
+                    <div><button type="button" class="btn btn-success" data-toggle="modal"
+                                 data-target="#verModal">Dar de baja piezas</button></div>
+                    <div class="modal fade" role="dialog" id="verModal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="pin">Ingrese PIN: </label>
+                                        <input type="password" name="pin" id="pin" class="form-control">
+                                    </div>
+                                    <button type="submit" class="btn btn-success">OK</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 </form>
+
+
+
+
                 </div>
+
             </div>
         </div>
     <script>
@@ -256,6 +275,7 @@
             });
         </script>
 
-    </body>
+
+        </body>
 
 </html>

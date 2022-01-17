@@ -2,6 +2,7 @@ import pyodbc
 import pandas
 import datetime
 import xlrd
+import app
 from os import remove
 
 def cargar_archivo(nombre_archivo):
@@ -93,11 +94,15 @@ def cargar_archivo(nombre_archivo):
     tabla.insert(127, "lecturaAGUJEREADO", None, allow_duplicates=False)
     tabla.insert(128, "fechaLecturaAGUJEREADO", None, allow_duplicates=False)
 
-    id = 1162676
+    cursor = con.cursor()
+    cursor.execute("SELECT top 1 idPieza FROM basePiezas "
+                   "WHERE idPieza < 4231001 ORDER BY idPieza DESC")
+    max = cursor.fetchone()
+    id = max[0]
     for i in range(0, len(tabla.index)):
         id = id + 1
         tabla.at[i, 'idPieza'] = id
-        tabla.at[i, 'fechaCarga'] = str(datetime.datetime.now())
+        tabla.at[i, 'fechaCarga'] = app.fecha()
 
     print(tabla)
 

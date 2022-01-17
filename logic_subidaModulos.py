@@ -1,8 +1,8 @@
 import pyodbc
 import pandas
-import datetime
 import xlrd
 from os import remove
+import app
 
 
 def cargar_archivo(nombre_archivo):
@@ -66,13 +66,16 @@ def cargar_archivo(nombre_archivo):
                       'DocumentoOrigen': tabla.iloc[i]['DocumentoOrigen'],
                       'OP': tabla.iloc[i]['OP'],
                       'lecturaHorno': None, 'fechaLecturaHorno': None,
-                      "fechaCarga": str(datetime.datetime.now())
+                      "fechaCarga": app.fecha()
                       }
         return resto_info
 
 
     tabla_final = pandas.DataFrame()
-    id = 280187
+    cursor = con.cursor()
+    cursor.execute("SELECT MAX(idModulo) FROM baseModulos")
+    max = cursor.fetchone()
+    id = max[0]
     for i in range(0, len(tabla.index)):
         cant = tabla.iloc[i]['PT_CANTIDAD']
         if cant == 1:

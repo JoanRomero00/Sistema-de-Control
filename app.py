@@ -72,7 +72,7 @@ def index3(maquina):
     return render_template("index3.html", maquina=maquina, sos=lista_SO(0), clientes=lista_CF(0))
 
 
-@app.route('/index4/<string:ventana>')
+@app.route('/AB_ModulosPiezas/<string:ventana>')
 def index4(ventana):
     list = []
     for o in lista_op2():
@@ -190,7 +190,7 @@ def escanear_codigo(maq, templete):
                 else:
                     complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = ?, lectura' + maq + ' = 1 WHERE idPieza = ?'
                 cursor = con.cursor()
-                cursor.execute(complete, fecha(),codigo)
+                cursor.execute(complete, fecha(), codigo)
                 cursor.commit()
                 cursor.close()
                 if templete == "index1":
@@ -207,6 +207,13 @@ def escanear_codigo(maq, templete):
 def lectura_masiva(maq):
     try:
         if request.method == 'POST':
+            pin = request.form['pin']
+            print(pin)
+            if ver_pin(pin) is None:
+                flash("Error: el PIN ingresado es incorrecto", 'danger')
+                return redirect(url_for('index1', maquina=maq, ventana=2))
+            else:
+                usuario = ver_pin(pin)
             op = request.form['ops']
             color = request.form['colores']
             espesor = request.form['espesores']
@@ -229,11 +236,12 @@ def lectura_masiva(maq):
                 ids.append(dict(zip(columnNames, record)))
             cursor.close()
             for id in ids:
-                complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = getdate(), lectura' + maq + ' = 1 WHERE idPieza = ?'
+                complete = 'UPDATE dbo.basePiezas SET fechaLectura' + maq + ' = ?, lectura' + maq + ' = 1 WHERE idPieza = ?'
                 cursor = con.cursor()
-                cursor.execute(complete, id['idPieza'])
+                cursor.execute(complete, fecha(), id['idPieza'])
                 cursor.commit()
                 cursor.close()
+            log_lecturaMasiva(usuario, op, color, espesor, maq)
             flash("Lectura masiva realizada con exito. \n OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor)
             return redirect(url_for('index1', maquina=maq, ventana=2))
     except pyodbc.DataError:
@@ -454,9 +462,20 @@ def fecha():
     fecha = today.strftime("%Y-%m-%d %H:%M:%S")
     return fecha
 
-def comparar_fecha(fecha):
-    if fecha == fecha():
-        return True
-    else:
-        return False
 
+def ver_pin(pin):
+    cursor = con.cursor()
+    cursor.execute("SELECT Usuario FROM tablaUsuario WHERE PIN = ?", pin)
+    usuario = cursor.fetchone()
+    cursor.close()
+    if usuario is None:
+        return None
+    else:
+        return usuario[0]
+
+def log_lecturaMasiva(usario, op, color, espesor, maquina):
+    cursor = con.cursor()
+    cursor.execute("INSERT INTO Prueba.dbo.logLecturaMasiva (Usuario, fechaMod, OP, Color, Espesor, maquina) "
+                   "VALUES (?,?,?,?,?,?)", usario, fecha(), op, color, espesor, maquina)
+    cursor.commit()
+    cursor.close()
