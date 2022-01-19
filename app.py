@@ -100,14 +100,29 @@ def colores():
 
 @app.route("/espesores", methods=["POST", "GET"])
 def espesores():
+    global piezas
+    if request.method == 'POST':
+        op = request.form['op']
+        color = request.form['color']
+        espesor = request.form['espesor']
+        print(espesor)
+        lectura = LecturaMasiva()
+        piezas = lectura.lista_piezas(op, color, espesor)
+        print(piezas)
+    return jsonify(piezas)
+
+
+@app.route("/piezas", methods=["POST", "GET"])
+def piezas():
     global cantidad
     if request.method == 'POST':
         op = request.form['op']
         color = request.form['color']
         espesor = request.form['espesor']
-        print(espesor + " , " + color + " , " + op)
+        pieza = request.form['pieza']
+        print(espesor + " , " + color + " , " + op + " , " + pieza)
         lectura = LecturaMasiva()
-        cantidad = lectura.calcular_cant(op, color, espesor)
+        cantidad = lectura.calcular_cant(op, color, espesor, pieza)
     return jsonify(cantidad)
 
 
@@ -124,20 +139,22 @@ def lectura_masiva(maq):
             op = request.form['ops']
             color = request.form['colores']
             espesor = request.form['espesores']
-            if color == 'Color':
+            pieza = request.form['piezas']
+            if color == 'Color' or pieza == 'Pieza':
                 flash("Error: Por favor ingrese todos los campos", 'danger')
                 return redirect(url_for('index1', maquina=maq, ventana=2))
             lectura1 = LecturaMasiva()
-            piezas = lectura1.verificar_lectura(op, color, espesor, maq)
+            piezas = lectura1.verificar_lectura(op, color, espesor, pieza, maq)
             if piezas == 1:
                 flash("Esta lectura masiva ya se a realizado. OP: " + op + " "
-                      "| COLOR: " + color + " | ESPESOR: " + espesor, 'warning')
+                      "| COLOR: " + color + " | ESPESOR: " + espesor + " | PIEZA: " + pieza, 'warning')
                 return redirect(url_for('index1', maquina=maq, ventana=2))
             lectura2 = LecturaMasiva()
             lectura2.updateMasivo(piezas, maq)
             log2 = LecturaMasiva()
-            log2.log_lecturaMasiva(usuario, op, color, espesor, maq)
-            flash("Lectura masiva realizada con exito. \n OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor)
+            log2.log_lecturaMasiva(usuario, op, color, espesor, maq, pieza)
+            flash("Lectura masiva realizada con exito. \n OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor
+                  + " | PIEZA: " + pieza)
             return redirect(url_for('index1', maquina=maq, ventana=2))
     except pyodbc.DataError:
         flash("Error: Por favor ingrese todos los campos", 'danger')
@@ -217,6 +234,7 @@ def baja_archivo():
     if request.method == 'POST':
         tipo = request.form['tipo']
         op = request.form['op']
+        print("BAJA: " + op)
         if tipo == 'baseModulos':
             delete = ABM()
             delete.elimar_Modulos(op)

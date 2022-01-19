@@ -37,9 +37,10 @@ class LecturaMasiva(DataBase):
         self.close()
         return OutputArray
 
-    def calcular_cant(self, op, color, espesor):
-        self.cursor.execute("SELECT COUNT(idPieza) as CANTIDAD FROM basePiezas WHERE OP=? "
-                            "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=?", op, color, espesor)
+    def lista_piezas(self, op, color, espesor):
+        self.cursor.execute("SELECT DISTINCT OP, PIEZA_NOMBRECOLOR, PIEZA_PROFUNDO, PIEZA_DESCRIPCION "
+                            "FROM Prueba.dbo.basePiezas " 
+                            "WHERE OP=? AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=?", op, color, espesor)
         records = self.cursor.fetchall()
         OutputArray = []
         columnNames = [column[0] for column in self.cursor.description]
@@ -48,10 +49,23 @@ class LecturaMasiva(DataBase):
         self.close()
         return OutputArray
 
-    def verificar_lectura(self, op, color, espesor, maquina):
+    def calcular_cant(self, op, color, espesor, pieza):
+        self.cursor.execute("SELECT COUNT(idPieza) as CANTIDAD FROM basePiezas WHERE OP=? "
+                            "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=? AND PIEZA_DESCRIPCION=?",
+                            op, color, espesor, pieza)
+        records = self.cursor.fetchall()
+        OutputArray = []
+        columnNames = [column[0] for column in self.cursor.description]
+        for record in records:
+            OutputArray.append(dict(zip(columnNames, record)))
+        self.close()
+        return OutputArray
+
+    def verificar_lectura(self, op, color, espesor, pieza, maquina):
         complete = "SELECT idPieza FROM basePiezas WHERE OP=? " \
-                   "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=? AND lectura" + maquina + " = 0"
-        self.cursor.execute(complete, op, color, espesor)
+                   "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=? AND PIEZA_DESCRIPCION=?" \
+                   " AND lectura" + maquina + " = 0"
+        self.cursor.execute(complete, op, color, espesor, pieza)
         records = self.cursor.fetchall()
         if not records:
             self.close()
@@ -80,8 +94,9 @@ class LecturaMasiva(DataBase):
         else:
             return usuario[0]
 
-    def log_lecturaMasiva(self, usuario, op, color, espesor, maquina):
-        self.cursor.execute("INSERT INTO Prueba.dbo.logLecturaMasiva (Usuario, fechaMod, OP, Color, Espesor, maquina) "
-                            "VALUES (?,?,?,?,?,?)", usuario, fecha(), op, color, espesor, maquina)
+    def log_lecturaMasiva(self, usuario, op, color, espesor, maquina, pieza):
+        self.cursor.execute("INSERT INTO Prueba.dbo.logLecturaMasiva "
+                            "(Usuario, fechaMod, OP, Color, Espesor, maquina, Pieza) "
+                            "VALUES (?,?,?,?,?,?,?)", usuario, fecha(), op, color, espesor, maquina, pieza)
         self.cursor.commit()
         self.close()

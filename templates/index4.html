@@ -96,21 +96,12 @@
                                 <option value="Ambas">Ambas</option>
                      </select>
                      </div>
-                    <!-- <div class="form-group">
-                            <label for="op">Seleccione OP:</label>
-                            <select name="op" id="op" data-live-search="true" class="form-control">
-                            <option selected>OP</option>
-                            {% for row in ops %}
-                            <option value={{row}}>{{row}}</option>
-                            {% endfor %}
-                            </select>
-                     </div> -->
                      <div class="form-group">
                          <label for="op">Seleccione OP:</label>
                          <input list="encodings" type="text" class="form-control" name="op" id="op" placeholder="OP">
                          <datalist id="encodings">
                             {% for row in ops %}
-                            <option value={{row}}>{{row}}</option>
+                            <option>{{row['OP']}}</option>
                             {% endfor %}
                          </datalist>
                      </div>

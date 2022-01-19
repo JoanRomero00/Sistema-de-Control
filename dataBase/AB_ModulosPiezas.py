@@ -599,17 +599,15 @@ class ABM(DataBase):
         remove('basePiezasLimpia.xlsx')
 
     def lista_op(self):
-        self.cursor.execute('(SELECT DISTINCT OP FROM basePiezas) UNION (SELECT DISTINCT OP FROM baseModulos) ORDER BY OP')
+        self.cursor.execute('(SELECT DISTINCT OP FROM basePiezas) UNION (SELECT DISTINCT OP FROM baseModulos) '
+                            'ORDER BY OP')
         records = self.cursor.fetchall()
         OutputArray = []
         columnNames = [column[0] for column in self.cursor.description]
         for record in records:
             OutputArray.append(dict(zip(columnNames, record)))
         self.close()
-        lista = []
-        for op in OutputArray:
-            lista.append(op['OP'])
-        return lista
+        return OutputArray
 
     def elimar_Modulos(self, op):
         self.cursor.execute("DELETE FROM baseModulos WHERE OP = ?", op)
