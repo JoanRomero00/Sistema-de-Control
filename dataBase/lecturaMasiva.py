@@ -50,10 +50,16 @@ class LecturaMasiva(DataBase):
         return OutputArray
 
     def calcular_cant(self, op, color, espesor, pieza):
-        self.cursor.execute("SELECT COUNT(idPieza) as CANTIDAD FROM basePiezas WHERE OP=? "
-                            "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=? AND PIEZA_DESCRIPCION=?",
-                            op, color, espesor, pieza)
-        records = self.cursor.fetchall()
+        if pieza == 1:
+            self.cursor.execute("SELECT COUNT(idPieza) as CANTIDAD FROM basePiezas WHERE OP=? "
+                                "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=?",
+                                op, color, espesor)
+            records = self.cursor.fetchall()
+        else:
+            self.cursor.execute("SELECT COUNT(idPieza) as CANTIDAD FROM basePiezas WHERE OP=? "
+                                "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=? AND PIEZA_DESCRIPCION=?",
+                                op, color, espesor, pieza)
+            records = self.cursor.fetchall()
         OutputArray = []
         columnNames = [column[0] for column in self.cursor.description]
         for record in records:
@@ -62,11 +68,18 @@ class LecturaMasiva(DataBase):
         return OutputArray
 
     def verificar_lectura(self, op, color, espesor, pieza, maquina):
-        complete = "SELECT idPieza FROM basePiezas WHERE OP=? " \
-                   "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=? AND PIEZA_DESCRIPCION=?" \
-                   " AND lectura" + maquina + " = 0"
-        self.cursor.execute(complete, op, color, espesor, pieza)
-        records = self.cursor.fetchall()
+        if pieza == 'Pieza':
+            complete = "SELECT idPieza FROM basePiezas WHERE OP=? " \
+                       "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=?" \
+                       " AND lectura" + maquina + " = 0"
+            self.cursor.execute(complete, op, color, espesor)
+            records = self.cursor.fetchall()
+        else:
+            complete = "SELECT idPieza FROM basePiezas WHERE OP=? " \
+                       "AND PIEZA_NOMBRECOLOR=? AND PIEZA_PROFUNDO=? AND PIEZA_DESCRIPCION=?" \
+                       " AND lectura" + maquina + " = 0"
+            self.cursor.execute(complete, op, color, espesor, pieza)
+            records = self.cursor.fetchall()
         if not records:
             self.close()
             return 1

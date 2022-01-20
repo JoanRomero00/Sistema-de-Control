@@ -8,6 +8,7 @@ from dataBase.lecturaMasiva import LecturaMasiva
 from dataBase.despacho import Despacho
 from dataBase.AB_ModulosPiezas import ABM
 from dataBase.plano import Plano
+from dataBase.informes import Informe
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = './'
@@ -30,19 +31,39 @@ def index1(maquina, ventana):
     if ventana == "1":
         display1 = ""
         display2 = "display:None;"
-        return render_template("index1.html", maquina=maquina, display1=display1, display2=display2,
+        display3 = "display:None;"
+        return render_template("index1.html", maquina=maquina, display1=display1, display2=display2, display3=display3,
                                piezas=piezas.getTabla(maquina), ops=ops.lista_ops(maquina))
     elif ventana == "2":
         display1 = "display:None;"
         display2 = ""
-        return render_template("index1.html", maquina=maquina, display1=display1, display2=display2,
+        display3 = "display:None;"
+        return render_template("index1.html", maquina=maquina, display1=display1, display2=display2, display3=display3,
                                piezas=piezas.getTabla(maquina), ops=ops.lista_ops(maquina))
+    elif ventana == "3":
+        display1 = "display:None;"
+        display2 = "display:None;"
+        display3 = ""
+        informe = Informe()
+        return  render_template("index1.html", maquina=maquina, display1=display1, display2=display2, display3=display3,
+                                piezas=piezas.getTabla(maquina), ops=ops.lista_ops(maquina),
+                                piezas_noleidas=informe.piezas_noleidas(maquina))
 
 
-@app.route('/index2/<string:maquina>')
-def index2(maquina):
+@app.route('/index2/<string:maquina>/<string:ventana>')
+def index2(maquina, ventana):
     piezas = Control()
-    return render_template("index2.html", maquina=maquina, piezas=piezas.getTabla(maquina))
+    if ventana == "1":
+        display1 = ""
+        display2 = "display:None;"
+        return render_template("index2.html", maquina=maquina, display1=display1, display2=display2,
+                               piezas=piezas.getTabla(maquina))
+    if ventana == "2":
+        informe = Informe()
+        display1 = "display:None;"
+        display2 = ""
+        return render_template("index2.html", maquina=maquina, piezas=piezas.getTabla(maquina),
+                               display1=display1, display2=display2 ,piezas_noleidas=informe.piezas_noleidas(maquina))
 
 
 @app.route('/escanear_codigo/<string:maq>/<string:templete>', methods=['POST'])
@@ -108,8 +129,19 @@ def espesores():
         print(espesor)
         lectura = LecturaMasiva()
         piezas = lectura.lista_piezas(op, color, espesor)
-        print(piezas)
     return jsonify(piezas)
+
+
+@app.route("/espesores_cantidad", methods=["POST", "GET"])
+def espesores_cantidad():
+    global cantidad
+    if request.method == 'POST':
+        op = request.form['op']
+        color = request.form['color']
+        espesor = request.form['espesor']
+        lectura = LecturaMasiva()
+        cantidad = lectura.calcular_cant(op, color, espesor, 1)
+    return jsonify(cantidad)
 
 
 @app.route("/piezas", methods=["POST", "GET"])
@@ -140,8 +172,8 @@ def lectura_masiva(maq):
             color = request.form['colores']
             espesor = request.form['espesores']
             pieza = request.form['piezas']
-            if color == 'Color' or pieza == 'Pieza':
-                flash("Error: Por favor ingrese todos los campos", 'danger')
+            if color == 'Color':
+                flash("Error: Por favor ingrese todos los campos 1", 'danger')
                 return redirect(url_for('index1', maquina=maq, ventana=2))
             lectura1 = LecturaMasiva()
             piezas = lectura1.verificar_lectura(op, color, espesor, pieza, maq)
@@ -152,12 +184,15 @@ def lectura_masiva(maq):
             lectura2 = LecturaMasiva()
             lectura2.updateMasivo(piezas, maq)
             log2 = LecturaMasiva()
-            log2.log_lecturaMasiva(usuario, op, color, espesor, maq, pieza)
+            if pieza == 'Pieza':
+                log2.log_lecturaMasiva(usuario, op, color, espesor, maq, None)
+            else:
+                log2.log_lecturaMasiva(usuario, op, color, espesor, maq, pieza)
             flash("Lectura masiva realizada con exito. \n OP: " + op + " | COLOR: " + color + " | ESPESOR: " + espesor
                   + " | PIEZA: " + pieza)
             return redirect(url_for('index1', maquina=maq, ventana=2))
     except pyodbc.DataError:
-        flash("Error: Por favor ingrese todos los campos", 'danger')
+        flash("Error: Por favor ingrese todos los campos 2", 'danger')
         return redirect(url_for('index1', maquina=maq, ventana=2))
 
 
