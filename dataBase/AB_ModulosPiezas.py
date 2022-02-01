@@ -61,7 +61,7 @@ class ABM(DataBase):
             return info
 
         tabla_final = pandas.DataFrame()
-        self.cursor.execute("SELECT MAX(idModulo) FROM baseModulos")
+        self.cursor.execute("SELECT MAX(idModulo) FROM produccion.baseModulos555")
         maximo = self.cursor.fetchone()
         idModulo = maximo[0]
         for i in range(0, len(tabla.index)):
@@ -77,6 +77,7 @@ class ABM(DataBase):
                     idModulo = idModulo + 1
                     fila = resto_info(idModulo, complete, j, tabla, i)
                     tabla_final = tabla_final.append(fila, ignore_index=True)
+        print(tabla_final)
 
         # subir a la BD
         tabla_final.to_excel('baseModulosDesglosada.xlsx')
@@ -85,7 +86,7 @@ class ABM(DataBase):
         sheet = book.sheet_by_name("Sheet1")
 
         query = """
-            INSERT INTO dbo.baseModulos (
+            INSERT INTO produccion.baseModulos555 (
                 idModulo, 
                 idOrdenManufactura, 
                 repeticion,
@@ -121,15 +122,12 @@ class ABM(DataBase):
                 fechaLecturaHorno,
                 fechaCarga
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
-                        ?, ?)"""
+                        ?, DATEADD(DAY,-2, ?))"""
 
         for r in range(1, sheet.nrows):
             idModulo = sheet.cell(r, 1).value
-            print(idModulo)
             idOrdenManufactura = sheet.cell(r, 2).value
-            print(idOrdenManufactura)
             repeticion = sheet.cell(r, 3).value
-            print(repeticion)
             ORDEN_MANUFACTURA = sheet.cell(r, 4).value
             SO = sheet.cell(r, 5).value
             FECHA_CONFIRMACION = sheet.cell(r, 6).value
@@ -280,8 +278,7 @@ class ABM(DataBase):
         tabla.insert(127, "lecturaAGUJEREADO", None, allow_duplicates=False)
         tabla.insert(128, "fechaLecturaAGUJEREADO", None, allow_duplicates=False)
 
-        self.cursor.execute("SELECT top 1 idPieza FROM basePiezas "
-                            "WHERE idPieza < 4231001 ORDER BY idPieza DESC")
+        self.cursor.execute("SELECT MAX(idPieza) FROM produccion.basePiezas555")
         maximo = self.cursor.fetchone()
         idPieza = maximo[0]
         for i in range(0, len(tabla.index)):
@@ -296,7 +293,7 @@ class ABM(DataBase):
         book = xlrd.open_workbook("basePiezasLimpia.xlsx")
         sheet = book.sheet_by_name("Sheet1")
 
-        query = "INSERT INTO dbo.basePiezas (idPieza, idOrdenManufactura, repeticion, ORDEN_MANUFACTURA, PIEZA_CODIGO, " \
+        query = "INSERT INTO produccion.basePiezas555 (idPieza, idOrdenManufactura, repeticion, ORDEN_MANUFACTURA, PIEZA_CODIGO, " \
                 "PIEZA_DESCRIPCION, PIEZA_UNIDAD, PIEZA_CANTIDAD, PIEZA_CATEGORIA, PIEZA_ANCHO, PIEZA_ALTO, PIEZA_PROFUNDO, " \
                 "PIEZA_NOMBRECOLOR, PIEZA_NOMBREDISTRIBUCION, PIEZA_NOMBREFAMILIA, PIEZA_NOMBRELINEA, PIEZA_NOMBREMATERIAL, " \
                 "PIEZA_NOMBREMODOCONSTRUCTIVO, PIEZA_NOMBREMODOSUSTENTACION, PIEZA_NOMBRETIPOENTIDAD, PIEZA_NOMBRETIPOMUEBLE, " \
@@ -318,8 +315,9 @@ class ABM(DataBase):
                 "lecturaALU, fechaLecturaALU, lecturaPLACARD, fechaLecturaPLACARD, lecturaPEGADO, fechaLecturaPEGADO, " \
                 "lecturaAGUJEREADO, fechaLecturaAGUJEREADO) " \
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " \
-                "?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " \
                 "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " \
+                "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATEADD(DAY, -2, ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, " \
+                "?, ?, ?, ?, ?, ?, ?, ?, ?, " \
                 "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 
@@ -598,9 +596,18 @@ class ABM(DataBase):
         remove(nombre_archivo)
         remove('basePiezasLimpia.xlsx')
 
-    def lista_op(self):
-        self.cursor.execute('(SELECT DISTINCT OP FROM basePiezas) UNION (SELECT DISTINCT OP FROM baseModulos) '
-                            'ORDER BY OP')
+    def lista_opModulos(self):
+        self.cursor.execute('SELECT DISTINCT OP FROM produccion.baseModulos555 ORDER BY OP')
+        records = self.cursor.fetchall()
+        OutputArray = []
+        columnNames = [column[0] for column in self.cursor.description]
+        for record in records:
+            OutputArray.append(dict(zip(columnNames, record)))
+        self.close()
+        return OutputArray
+
+    def lista_opPiezas(self):
+        self.cursor.execute('SELECT DISTINCT OP FROM produccion.basePiezas555 ORDER BY OP')
         records = self.cursor.fetchall()
         OutputArray = []
         columnNames = [column[0] for column in self.cursor.description]
@@ -610,11 +617,62 @@ class ABM(DataBase):
         return OutputArray
 
     def elimar_Modulos(self, op):
-        self.cursor.execute("DELETE FROM baseModulos WHERE OP = ?", op)
+        self.cursor.execute("DELETE FROM produccion.baseModulos555 WHERE OP = ?", op)
         self.cursor.commit()
         self.close()
 
     def elimar_Piezas(self, op):
-        self.cursor.execute("DELETE FROM basePiezas WHERE OP = ?", op)
+        op2 = op + " STD"
+        self.cursor.execute("DELETE FROM produccion.basePiezas555 WHERE OP = ? OR OP = ?", op, op2)
         self.cursor.commit()
         self.close()
+
+    def setLogAB(self, tipo, base, op, cantidad):
+        self.cursor.execute("SELECT MAX(id) FROM produccion.logABModulosPiezas")
+        maximo = self.cursor.fetchone()
+        ids = maximo[0] + 1
+        if op == 0:
+            if base == "Modulo":
+                self.cursor.execute("SELECT OP FROM produccion.baseModulos555 "
+                                    "WHERE idModulo = (SELECT MAX(idModulo) FROM produccion.baseModulos555)")
+            else:
+                self.cursor.execute("SELECT OP FROM produccion.basePiezas555 "
+                                    "WHERE idPieza = (SELECT MAX(idPieza) FROM produccion.basePiezas555)")
+            dato = self.cursor.fetchone()
+            op = dato[0]
+        if cantidad == 0:
+            if base == "Modulo":
+                self.cursor.execute("SELECT COUNT(idModulo) FROM produccion.baseModulos555 WHERE OP = ?", op)
+                cant = self.cursor.fetchone()
+                cantidad = cant[0]
+            else:
+                op2 = op + " STD"
+                self.cursor.execute("SELECT COUNT(idPieza) FROM produccion.basePiezas555 WHERE OP = ? OR OP = ?", op, op2)
+                cant = self.cursor.fetchone()
+                cantidad = cant[0]
+        self.cursor.execute("INSERT INTO produccion.logABModulosPiezas (id, Tipo, Base, OP, Cantidad, Fecha) "
+                            "VALUES (?, ?, ?, ?, ?, ?)", ids, tipo, base, op, cantidad, fecha())
+        self.cursor.commit()
+        self.close()
+
+    def getLogAB(self):
+        self.cursor.execute('SELECT TOP 10 * FROM produccion.logABModulosPiezas ORDER BY id DESC')
+        records = self.cursor.fetchall()
+        OutputArray = []
+        columnNames = [column[0] for column in self.cursor.description]
+        for record in records:
+            OutputArray.append(dict(zip(columnNames, record)))
+        self.close()
+        return OutputArray
+
+    def getCant(self, base, op):
+        if base == "Modulo":
+            self.cursor.execute("SELECT COUNT(idModulo) FROM produccion.baseModulos555 WHERE OP = ?", op)
+            cant = self.cursor.fetchone()
+            cantidad = cant[0]
+        else:
+            op2 = op + " STD"
+            self.cursor.execute("SELECT COUNT(idPieza) FROM produccion.basePiezas555 WHERE OP = ? OR OP = ?", op, op2)
+            cant = self.cursor.fetchone()
+            cantidad = cant[0]
+        return cantidad

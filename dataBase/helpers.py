@@ -1,6 +1,7 @@
-import datetime
+from datetime import datetime
 
 
 def fecha():
-    today = datetime.datetime.now()
-    return today.strftime("%Y-%m-%d %H:%M:%S")
+    today = datetime.now()
+    todaySTR = today.strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.strptime(todaySTR, '%Y-%m-%d %H:%M:%S')
